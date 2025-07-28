@@ -1,193 +1,187 @@
-# Hotel Booking System
+# 🏨 Hotel Booking System 2.0
 
-A modern Android application built with Jetpack Compose for hotel booking and management.
+A modern Android application built with **Jetpack Compose** and **Firebase** for comprehensive hotel booking management.
 
-## Features
+![Hotel Booking System](app/src/main/res/drawable/image.jpg)
 
-### 🔐 Authentication
-- **Splash Screen**: Beautiful animated splash screen with hotel branding
-- **Login Screen**: Welcome screen that directs users to sign up
-- **Sign Up Screen**: User registration with name, email, and password validation
-- **Admin Dashboard**: Comprehensive admin interface for hotel management
-- **User Dashboard**: User-friendly interface for hotel booking and management
-- **Admin Access**: Admin credentials are pre-configured in Firebase
+## ✨ Features
 
-### 🎨 UI/UX
-- Modern Material Design 3 components
-- Beautiful gradient backgrounds
-- Smooth animations and transitions
-- Responsive design for different screen sizes
-- Password visibility toggle
-- Form validation with error messages
-- Loading states and progress indicators
+### 🔐 Authentication System
+- **Splash Screen** with branded hotel logo
+- **Login Screen** with email/password authentication
+- **Sign Up Screen** for new user registration
+- **Role-based Access**: Admin and User dashboards
+- **Firebase Authentication** integration
 
-### 🔧 Technical Features
-- **Jetpack Compose**: Modern declarative UI toolkit
-- **Firebase Authentication**: Secure user authentication
-- **Navigation Compose**: Type-safe navigation between screens
-- **ViewModel**: State management with Kotlin Flow
-- **Material Icons**: Comprehensive icon library
-- **Gradle**: Modern build system with version catalogs
+### 👨‍💼 Admin Dashboard
+- **Hotel Management**: Add, edit, delete, and update hotels
+- **Booking Management**: View and manage all hotel bookings
+- **User Management**: Monitor and manage user accounts
+- **Bulk Operations**: Select multiple hotels for batch actions
+- **Real-time Statistics**: Hotel and booking analytics
 
-## Screenshots
+### 👤 User Dashboard
+- **Hotel Search**: Browse available hotels with filters
+- **Booking System**: Make hotel reservations with detailed forms
+- **My Bookings**: View and manage personal bookings
+- **Profile Management**: Update personal information
+- **Help & Support**: Contact support and report issues
 
-### Splash Screen
-- Animated hotel icon with gradient background
-- App branding and tagline
-- Loading indicator
+### 🏗️ Technical Features
+- **Modern UI**: Material Design 3 with Jetpack Compose
+- **Firebase Integration**: Real-time data synchronization
+- **Offline Support**: Mock data for testing
+- **Navigation**: Seamless screen transitions
+- **State Management**: MVVM architecture with ViewModels
+- **Responsive Design**: Works on all Android screen sizes
 
-### Login Screen
-- Welcome message explaining the registration process
-- Information about admin access
-- Direct navigation to sign up screen
-- Beautiful gradient background
-
-### Sign Up Screen
-- Full name, email, password, and confirm password fields
-- Real-time password validation
-- Password mismatch detection
-- Form validation
-- Welcome message for new users
-
-### Admin Dashboard
-- **Statistics Overview**: Total hotels, active bookings, users, and revenue
-- **Quick Actions**: Manage hotels, bookings, users, and reports
-- **Admin Controls**: Comprehensive hotel management interface
-- **Professional Design**: Clean, card-based layout with admin branding
-
-### User Dashboard
-- **Welcome Interface**: Personalized greeting with user information
-- **Quick Stats**: My bookings and saved hotels counters
-- **Search Hotels**: Prominent search functionality
-- **Quick Actions**: My bookings, book hotel, profile, and help
-- **Recent Activity**: Booking confirmations and payment history
-- **User-Friendly Design**: Intuitive interface for hotel booking
-
-## Setup Instructions
+## 🚀 Getting Started
 
 ### Prerequisites
-- Android Studio Hedgehog or later
-- Android SDK 35
-- Kotlin 2.0.0
-- Firebase project with Authentication enabled
+- Android Studio Arctic Fox or later
+- Android SDK 27+
+- Kotlin 1.8+
+- Firebase project setup
 
 ### Installation
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/Aayuskaa1/HotelBookingSystem2.git
    cd HotelBookingSystem2
    ```
 
-2. **Configure Firebase**
-   - Create a Firebase project at [Firebase Console](https://console.firebase.google.com/)
-   - Enable Authentication with Email/Password provider
+2. **Firebase Setup**
+   - Create a new Firebase project at [Firebase Console](https://console.firebase.google.com/)
+   - Enable Authentication and Firestore
    - Download `google-services.json` and place it in the `app/` directory
+   - Replace the placeholder values in `app/google-services.json`
 
 3. **Build and Run**
    ```bash
    ./gradlew assembleDebug
+   ./gradlew installDebug
    ```
-   Or open the project in Android Studio and run it directly.
 
-### Dependencies
+### Default Credentials
 
-The app uses the following major dependencies:
+#### Admin Access
+- **Email**: `admin@hotelbooking.com`
+- **Password**: `admin123456`
 
-- **Jetpack Compose BOM**: 2024.04.01
-- **Firebase Auth**: 24.0.0
-- **Navigation Compose**: 2.7.7
-- **Material Icons**: 1.6.3
-- **Lifecycle ViewModel**: 2.9.2
+#### User Access
+- **Email**: `aayuska@gmail.com`
+- **Password**: `Aayuska@123`
 
-## Project Structure
+## 📱 Screenshots
+
+### Login Screen
+- Professional hotel logo
+- Clean authentication form
+- Error handling and validation
+
+### Admin Dashboard
+- Comprehensive management tools
+- Real-time statistics
+- Bulk operations support
+
+### User Dashboard
+- Hotel search and booking
+- Personal booking management
+- Profile customization
+
+## 🛠️ Architecture
 
 ```
-app/src/main/java/com/example/hotelbookingsystem/
-├── MainActivity.kt                 # Main activity with app entry point
-├── navigation/
-│   └── AppNavigation.kt           # Navigation setup and screen routing
-├── ui/screens/
-│   ├── SplashScreen.kt            # Animated splash screen
-│   ├── LoginScreen.kt             # Welcome screen with registration info
-│   ├── SignUpScreen.kt            # User registration interface
-│   ├── AdminDashboard.kt          # Admin dashboard with management tools
-│   ├── UserDashboard.kt           # User dashboard for hotel booking
-│   └── HomeScreen.kt              # Legacy home screen
-├── viewmodel/
-│   └── AuthViewModel.kt           # Authentication state management
-├── utils/
-│   └── UserRole.kt                # User role detection utilities
-└── ui/theme/
-    ├── Color.kt                   # App color definitions
-    ├── Theme.kt                   # Material 3 theme setup
-    └── Type.kt                    # Typography definitions
+app/
+├── src/main/java/com/example/hotelbookingsystem/
+│   ├── model/           # Data models
+│   ├── repository/      # Data access layer
+│   ├── viewmodel/       # Business logic
+│   ├── ui/screens/      # UI components
+│   ├── navigation/      # Navigation logic
+│   └── utils/           # Utility classes
 ```
 
-## Architecture
+### Key Components
 
-The app follows MVVM (Model-View-ViewModel) architecture:
+- **MVVM Pattern**: Separation of concerns
+- **Repository Pattern**: Data abstraction
+- **Compose UI**: Declarative UI framework
+- **Firebase**: Backend services
+- **Coroutines**: Asynchronous programming
 
-- **View**: Compose UI components in the `ui/screens` package
-- **ViewModel**: `AuthViewModel` manages authentication state and business logic
-- **Model**: Firebase Authentication handles user data and authentication
+## 🔧 Configuration
 
-### State Management
-- Uses Kotlin Flow for reactive state management
-- `AuthState` sealed class represents different authentication states
-- Loading and error states are managed through StateFlow
+### Firebase Setup
+1. Enable Authentication (Email/Password)
+2. Create Firestore database
+3. Set up security rules
+4. Configure `google-services.json`
 
-### Navigation
-- Single Activity architecture with Compose Navigation
-- Type-safe navigation using sealed class `Screen`
-- Automatic navigation based on authentication state
+### Build Configuration
+- **Target SDK**: 35
+- **Minimum SDK**: 27
+- **Kotlin**: 1.9+
+- **Compose BOM**: Latest version
 
-## Features in Detail
+## 📊 Features in Detail
 
-### Authentication Flow
-1. **Splash Screen**: Shows for 2.5 seconds with animations
-2. **Login Screen**: Welcome screen that explains the registration process
-3. **Sign Up**: User creates new account
-4. **Role Detection**: System determines if user is admin or regular user
-5. **Dashboard**: Admin Dashboard for administrators, User Dashboard for regular users
-6. **Logout**: Returns user to login screen
-7. **Admin Access**: Admin can access with pre-configured Firebase credentials
+### Hotel Management
+- ✅ Add new hotels with details
+- ✅ Edit existing hotel information
+- ✅ Delete hotels from system
+- ✅ Toggle hotel active/inactive status
+- ✅ Bulk operations (activate/deactivate/delete)
+- ✅ Search and filter hotels
 
-### Form Validation
-- Email format validation
-- Password strength requirements (minimum 6 characters)
-- Password confirmation matching
-- Real-time validation feedback
+### Booking System
+- ✅ Create new bookings
+- ✅ View booking details
+- ✅ Update booking status
+- ✅ Cancel bookings
+- ✅ Payment status tracking
+- ✅ Booking history
 
-### Error Handling
-- Network error detection
-- Firebase authentication error messages
-- User-friendly error display
-- Form validation errors
+### User Management
+- ✅ User registration
+- ✅ Profile updates
+- ✅ Role-based access control
+- ✅ User statistics
+- ✅ Account management
 
-## Future Enhancements
-
-- [ ] Hotel listing and search functionality
-- [ ] Room booking and reservation system
-- [ ] User profile management
-- [ ] Booking history
-- [ ] Payment integration
-- [ ] Push notifications
-- [ ] Offline support
-- [ ] Multi-language support
-
-## Contributing
+## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-## License
+## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Support
+## 👨‍💻 Author
 
-For support and questions, please open an issue in the repository or contact the development team. 
+**Aayuska Adhikari**
+- GitHub: [@Aayuskaa1](https://github.com/Aayuskaa1)
+- Portfolio: [Your Portfolio Link]
+
+## 🙏 Acknowledgments
+
+- Material Design 3 guidelines
+- Jetpack Compose documentation
+- Firebase documentation
+- Android developer community
+
+## 📞 Support
+
+For support and questions:
+- Create an issue in this repository
+- Contact: [Your Email]
+- Documentation: [Your Docs Link]
+
+---
+
+⭐ **Star this repository if you find it helpful!** 
