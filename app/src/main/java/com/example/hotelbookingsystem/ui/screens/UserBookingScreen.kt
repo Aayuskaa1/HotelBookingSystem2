@@ -43,7 +43,7 @@ fun UserBookingScreen(
     var numberOfGuests by remember { mutableStateOf("1") }
     var specialRequests by remember { mutableStateOf("") }
     var guestName by remember { mutableStateOf(currentUser?.displayName ?: "") }
-    var guestEmail by remember { mutableStateOf(currentUser?.email ?: "") }
+    var guestEmail by remember { mutableStateOf(currentUser?.email?.split("@")?.firstOrNull() ?: "") }
     var guestPhone by remember { mutableStateOf("") }
     
     var checkInError by remember { mutableStateOf<String?>(null) }
@@ -263,7 +263,8 @@ fun UserBookingScreen(
                     guestEmail = it
                     emailError = null
                 },
-                label = { Text("Email *") },
+                label = { Text("Email Name *") },
+                placeholder = { Text("Enter email name (before @)") },
                 modifier = Modifier.fillMaxWidth(),
                 isError = emailError != null,
                 supportingText = emailError?.let { { Text(it) } },
@@ -324,10 +325,17 @@ fun UserBookingScreen(
                         "Valid number of guests is required"
                     } else null
                     nameError = if (guestName.isBlank()) "Guest name is required" else null
-                    emailError = if (guestEmail.isBlank()) "Guest email is required" else null
+                    emailError = if (guestEmail.isBlank()) "Email name is required" else null
                     
                     if (checkInError == null && checkOutError == null && guestsError == null && 
                         nameError == null && emailError == null) {
+                        
+                        // Construct full email address
+                        val fullEmail = if (guestEmail.contains("@")) {
+                            guestEmail
+                        } else {
+                            "${guestEmail}@example.com"
+                        }
                         
                         val booking = Booking(
                             id = "",
@@ -335,7 +343,7 @@ fun UserBookingScreen(
                             hotelName = hotel.name,
                             userId = currentUser?.uid ?: "user_${System.currentTimeMillis()}",
                             userName = guestName,
-                            userEmail = guestEmail,
+                            userEmail = fullEmail,
                             checkInDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(checkInDate)?.time ?: 0L,
                             checkOutDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(checkOutDate)?.time ?: 0L,
                             numberOfGuests = numberOfGuests.toInt(),

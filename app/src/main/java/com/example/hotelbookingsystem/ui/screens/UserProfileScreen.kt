@@ -28,7 +28,7 @@ fun UserProfileScreen(
 ) {
     var firstName by remember { mutableStateOf(user.displayName?.split(" ")?.firstOrNull() ?: "") }
     var lastName by remember { mutableStateOf(user.displayName?.split(" ")?.drop(1)?.joinToString(" ") ?: "") }
-    var email by remember { mutableStateOf(user.email) }
+    var email by remember { mutableStateOf(user.email?.split("@")?.firstOrNull() ?: "") }
     var phone by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
     var city by remember { mutableStateOf("") }
@@ -167,7 +167,7 @@ fun UserProfileScreen(
                     email = it
                     emailError = null
                 },
-                label = { Text("Email *") },
+                label = { Text("Email Name *") },
                 modifier = Modifier.fillMaxWidth(),
                 isError = emailError != null,
                 supportingText = emailError?.let { { Text(it) } },

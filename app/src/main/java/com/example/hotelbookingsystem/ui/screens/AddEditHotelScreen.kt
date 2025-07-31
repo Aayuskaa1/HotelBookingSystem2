@@ -100,6 +100,15 @@ fun AddEditHotelScreen(
                             if (nameError == null && cityError == null && countryError == null && 
                                 priceError == null && ratingError == null) {
                                 
+                                // Construct full email address
+                                val fullEmail = if (email.trim().contains("@")) {
+                                    email.trim()
+                                } else if (email.trim().isNotEmpty()) {
+                                    "${email.trim()}@example.com"
+                                } else {
+                                    ""
+                                }
+                                
                                 val hotelToSave = Hotel(
                                     id = hotel?.id ?: "",
                                     name = name.trim(),
@@ -108,7 +117,7 @@ fun AddEditHotelScreen(
                                     city = city.trim(),
                                     country = country.trim(),
                                     phone = phone.trim(),
-                                    email = email.trim(),
+                                    email = fullEmail,
                                     website = website.trim(),
                                     pricePerNight = price!!,
                                     rating = ratingValue ?: 0.0f,
@@ -325,7 +334,8 @@ fun AddEditHotelScreen(
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text("Email") },
+                label = { Text("Email Name") },
+                placeholder = { Text("Enter email name (before @)") },
                 modifier = Modifier.fillMaxWidth(),
                 leadingIcon = {
                     Icon(
