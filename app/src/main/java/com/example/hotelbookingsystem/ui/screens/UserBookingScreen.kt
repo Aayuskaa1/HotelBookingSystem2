@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -274,10 +275,11 @@ fun UserBookingScreen(
             // Enhanced Check-in Date
             OutlinedTextField(
                 value = selectedCheckInDate?.let { 
-                    SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(it) 
+                    SimpleDateFormat("dd", Locale.getDefault()).format(it) 
                 } ?: "",
                 onValueChange = { },
                 label = { Text("Check-in Date *") },
+                placeholder = { Text("Day") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { showCheckInDatePicker = true },
@@ -294,8 +296,8 @@ fun UserBookingScreen(
                 singleLine = true,
                 readOnly = true,
                 trailingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.CalendarToday,
+                    CalendarIconWithDate(
+                        date = selectedCheckInDate,
                         contentDescription = "Select Check-in Date",
                         tint = MaterialTheme.colorScheme.primary
                     )
@@ -305,10 +307,11 @@ fun UserBookingScreen(
             // Enhanced Check-out Date
             OutlinedTextField(
                 value = selectedCheckOutDate?.let { 
-                    SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(it) 
+                    SimpleDateFormat("dd", Locale.getDefault()).format(it) 
                 } ?: "",
                 onValueChange = { },
                 label = { Text("Check-out Date *") },
+                placeholder = { Text("Day") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { 
@@ -333,8 +336,8 @@ fun UserBookingScreen(
                 singleLine = true,
                 readOnly = true,
                 trailingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.CalendarToday,
+                    CalendarIconWithDate(
+                        date = selectedCheckOutDate,
                         contentDescription = "Select Check-out Date",
                         tint = if (selectedCheckInDate != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -664,4 +667,53 @@ fun UserBookingScreen(
             }
         }
     }
-} 
+}
+
+@Composable
+fun CalendarIconWithDate(
+    date: Date?,
+    contentDescription: String?,
+    tint: Color
+) {
+    Box(
+        modifier = Modifier.size(28.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        // Calendar icon background
+        Icon(
+            imageVector = Icons.Default.CalendarToday,
+            contentDescription = contentDescription,
+            tint = tint,
+            modifier = Modifier.size(28.dp)
+        )
+        
+        // Date number overlay
+        if (date != null) {
+            val dayOfMonth = SimpleDateFormat("dd", Locale.getDefault()).format(date)
+            val month = SimpleDateFormat("MMM", Locale.getDefault()).format(date)
+            
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.offset(y = (-1).dp)
+            ) {
+                // Month abbreviation
+                Text(
+                    text = month,
+                    fontSize = 6.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = if (tint == MaterialTheme.colorScheme.primary) Color.White else MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.Center
+                )
+                
+                // Day number
+                Text(
+                    text = dayOfMonth,
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = if (tint == MaterialTheme.colorScheme.primary) Color.White else MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
+}
