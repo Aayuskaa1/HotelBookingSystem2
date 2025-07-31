@@ -9,6 +9,7 @@ Your hotel booking system now has **interactive calendar pickers** for check-in 
 ### **Interactive Date Selection:**
 - **Click to open calendar** for check-in and check-out dates
 - **Visual calendar interface** with easy date selection
+- **Date range restriction** from 1999 to 2028
 - **Date validation** to ensure logical booking periods
 - **Formatted display** (e.g., "15 Dec 2024") for better readability
 
@@ -17,6 +18,7 @@ Your hotel booking system now has **interactive calendar pickers** for check-in 
 - **Calendar icons** indicate clickable date fields
 - **Read-only fields** prevent invalid date formats
 - **Automatic date formatting** for display
+- **Date range guidance** (1999-2028) displayed to users
 
 ## 💰 **Nepalese Rupees Currency**
 
@@ -37,10 +39,10 @@ Your hotel booking system now has **interactive calendar pickers** for check-in 
 ### **Selecting Dates:**
 1. **Click on "Check-in Date"** field
 2. **Calendar opens** with current date selected
-3. **Navigate months** using arrow buttons
+3. **Navigate months/years** using arrow buttons (1999-2028 range)
 4. **Click on desired date** to select
 5. **Click "OK"** to confirm selection
-6. **Repeat for check-out date**
+6. **Repeat for check-out date** (must be after check-in date)
 
 ### **Booking Process:**
 1. **Select check-in date** using calendar
@@ -89,7 +91,9 @@ val totalPrice = priceInNPR * 3 * 2
 - **Material3 DatePicker** component
 - **DatePickerDialog** for modal selection
 - **rememberDatePickerState** for state management
+- **Date range restriction** (1999-2028)
 - **Date validation** and error handling
+- **Check-out after check-in** validation
 
 ### **Currency Conversion:**
 - **Automatic USD to NPR** conversion
@@ -131,10 +135,13 @@ Total Price: NPR 97,500
 
 ### **Calendar Picker:**
 - ✅ **Interactive calendar** for date selection
-- ✅ **Visual date picker** with month navigation
+- ✅ **Visual date picker** with month/year navigation
+- ✅ **Date range restriction** (1999-2028)
 - ✅ **Date validation** and error handling
+- ✅ **Check-out after check-in** validation
 - ✅ **Formatted date display** (dd MMM yyyy)
 - ✅ **Calendar icons** for better UX
+- ✅ **Date range guidance** for users
 
 ### **Nepalese Rupees:**
 - ✅ **All prices in NPR** currency

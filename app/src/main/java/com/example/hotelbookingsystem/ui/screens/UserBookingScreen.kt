@@ -195,6 +195,12 @@ fun UserBookingScreen(
                 color = MaterialTheme.colorScheme.primary
             )
             
+            Text(
+                text = "Select dates between 1999-2028",
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            
             // Check-in Date
             OutlinedTextField(
                 value = selectedCheckInDate?.let { 
@@ -342,6 +348,13 @@ fun UserBookingScreen(
                     // Validate form
                     checkInError = if (selectedCheckInDate == null) "Check-in date is required" else null
                     checkOutError = if (selectedCheckOutDate == null) "Check-out date is required" else null
+                    
+                    // Validate date range
+                    if (selectedCheckInDate != null && selectedCheckOutDate != null) {
+                        if (selectedCheckOutDate!! <= selectedCheckInDate!!) {
+                            checkOutError = "Check-out date must be after check-in date"
+                        }
+                    }
                     guestsError = if (numberOfGuests.isBlank() || numberOfGuests.toIntOrNull() == null || numberOfGuests.toInt() < 1) {
                         "Valid number of guests is required"
                     } else null
@@ -403,7 +416,8 @@ fun UserBookingScreen(
     // Date Pickers
     if (showCheckInDatePicker) {
         val checkInDatePickerState = rememberDatePickerState(
-            initialSelectedDateMillis = selectedCheckInDate?.time ?: System.currentTimeMillis()
+            initialSelectedDateMillis = selectedCheckInDate?.time ?: System.currentTimeMillis(),
+            yearRange = IntRange(1999, 2028)
         )
         
         DatePickerDialog(
@@ -434,7 +448,8 @@ fun UserBookingScreen(
     
     if (showCheckOutDatePicker) {
         val checkOutDatePickerState = rememberDatePickerState(
-            initialSelectedDateMillis = selectedCheckOutDate?.time ?: (selectedCheckInDate?.time ?: System.currentTimeMillis())
+            initialSelectedDateMillis = selectedCheckOutDate?.time ?: (selectedCheckInDate?.time ?: System.currentTimeMillis()),
+            yearRange = IntRange(1999, 2028)
         )
         
         DatePickerDialog(
