@@ -26,8 +26,29 @@ fun AdminDashboard(
     onLogout: () -> Unit,
     onManageHotels: () -> Unit = {},
     onManageBookings: () -> Unit = {},
-    onManageUsers: () -> Unit = {}
+    onManageUsers: () -> Unit = {},
+    hotelViewModel: com.example.hotelbookingsystem.viewmodel.HotelViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
+    bookingViewModel: com.example.hotelbookingsystem.viewmodel.BookingViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
+    userViewModel: com.example.hotelbookingsystem.viewmodel.UserViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
+    val hotels by hotelViewModel.hotels.collectAsState()
+    val bookings by bookingViewModel.bookings.collectAsState()
+    val users by userViewModel.users.collectAsState()
+    
+    // Load data on first launch
+    LaunchedEffect(Unit) {
+        hotelViewModel.loadHotels()
+        bookingViewModel.loadBookings()
+        userViewModel.loadUsers()
+    }
+    
+    // Calculate statistics
+    val totalHotels = hotels.size
+    val activeBookings = bookings.count { it.bookingStatus == com.example.hotelbookingsystem.model.BookingStatus.CONFIRMED }
+    val totalUsers = users.size
+    val totalRevenue = bookings
+        .filter { it.paymentStatus == com.example.hotelbookingsystem.model.PaymentStatus.PAID }
+        .sumOf { it.totalAmount }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -94,13 +115,13 @@ fun AdminDashboard(
                 ) {
                     StatCard(
                         title = "Total Hotels",
-                        value = "12",
+                        value = totalHotels.toString(),
                         icon = Icons.Default.Business,
                         modifier = Modifier.weight(1f)
                     )
                     StatCard(
                         title = "Active Bookings",
-                        value = "45",
+                        value = activeBookings.toString(),
                         icon = Icons.Default.BookOnline,
                         modifier = Modifier.weight(1f)
                     )
@@ -112,13 +133,13 @@ fun AdminDashboard(
                 ) {
                     StatCard(
                         title = "Total Users",
-                        value = "156",
+                        value = totalUsers.toString(),
                         icon = Icons.Default.People,
                         modifier = Modifier.weight(1f)
                     )
                     StatCard(
                         title = "Revenue",
-                        value = "$12.5K",
+                        value = "$${String.format("%.1f", totalRevenue / 1000)}K",
                         icon = Icons.Default.AttachMoney,
                         modifier = Modifier.weight(1f)
                     )

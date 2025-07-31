@@ -37,13 +37,15 @@ fun UserDashboard(
     val bookings by bookingViewModel.bookings.collectAsState()
     
     // Load bookings on first launch
-    LaunchedEffect(Unit) {
-        bookingViewModel.loadBookings()
+    LaunchedEffect(user) {
+        bookingViewModel.loadUserBookings(user.uid)
     }
     
     // Calculate user statistics
-    val userBookings = remember(bookings) {
-        bookings.filter { it.userEmail == user.email }
+    val userBookings = remember(bookings, user) {
+        bookings.filter { 
+            it.userId == user.uid || it.userEmail == user.email 
+        }
     }
     val activeBookings = userBookings.count { it.bookingStatus == com.example.hotelbookingsystem.model.BookingStatus.CONFIRMED }
     val totalSpent = userBookings.sumOf { it.totalAmount }

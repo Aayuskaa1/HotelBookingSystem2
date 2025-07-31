@@ -29,6 +29,7 @@ import java.util.*
 @Composable
 fun UserBookingScreen(
     hotel: Hotel,
+    currentUser: com.example.hotelbookingsystem.model.MockFirebaseUser?,
     onBackClick: () -> Unit,
     onBookingSuccess: () -> Unit,
     bookingViewModel: BookingViewModel
@@ -41,8 +42,8 @@ fun UserBookingScreen(
     var checkOutDate by remember { mutableStateOf("") }
     var numberOfGuests by remember { mutableStateOf("1") }
     var specialRequests by remember { mutableStateOf("") }
-    var guestName by remember { mutableStateOf("") }
-    var guestEmail by remember { mutableStateOf("") }
+    var guestName by remember { mutableStateOf(currentUser?.displayName ?: "") }
+    var guestEmail by remember { mutableStateOf(currentUser?.email ?: "") }
     var guestPhone by remember { mutableStateOf("") }
     
     var checkInError by remember { mutableStateOf<String?>(null) }
@@ -75,7 +76,7 @@ fun UserBookingScreen(
     // Clear messages after showing
     LaunchedEffect(errorMessage, successMessage) {
         if (successMessage != null) {
-            kotlinx.coroutines.delay(1000)
+            kotlinx.coroutines.delay(2000) // Show success message longer
             onBookingSuccess()
         }
     }
@@ -147,6 +148,31 @@ fun UserBookingScreen(
                     modifier = Modifier.padding(16.dp),
                     color = MaterialTheme.colorScheme.onErrorContainer
                 )
+            }
+        }
+        
+        successMessage?.let { message ->
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = message,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Your booking will appear in 'My Bookings' section",
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        fontSize = 12.sp
+                    )
+                }
             }
         }
         
@@ -307,7 +333,7 @@ fun UserBookingScreen(
                             id = "",
                             hotelId = hotel.id,
                             hotelName = hotel.name,
-                            userId = "user_${System.currentTimeMillis()}",
+                            userId = currentUser?.uid ?: "user_${System.currentTimeMillis()}",
                             userName = guestName,
                             userEmail = guestEmail,
                             checkInDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(checkInDate)?.time ?: 0L,

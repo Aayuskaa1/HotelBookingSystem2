@@ -157,7 +157,9 @@ fun AppNavigation(
                     onManageUsers = {
                         navController.navigate(Screen.UserManagement.route)
                     },
-                            // onViewReports removed
+                    hotelViewModel = sharedHotelViewModel,
+                    bookingViewModel = sharedBookingViewModel,
+                    userViewModel = sharedUserViewModel
                 )
             } ?: run {
                 // If no user, navigate back to login
@@ -279,6 +281,7 @@ fun AppNavigation(
             selectedHotelForBooking?.let { hotel ->
                 UserBookingScreen(
                     hotel = hotel,
+                    currentUser = currentUser,
                     onBackClick = {
                         navController.popBackStack()
                     },
@@ -294,6 +297,7 @@ fun AppNavigation(
         // User My Bookings Screen
         composable(Screen.UserMyBookings.route) {
             UserMyBookingsScreen(
+                currentUser = currentUser,
                 onBackClick = {
                     navController.popBackStack()
                 },

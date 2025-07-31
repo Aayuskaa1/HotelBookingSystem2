@@ -51,6 +51,24 @@ class BookingViewModel : ViewModel() {
         }
     }
     
+    // Load bookings for specific user
+    fun loadUserBookings(userId: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _errorMessage.value = null
+            
+            try {
+                repository.getBookingsByUser(userId).collect { bookingList ->
+                    _bookings.value = bookingList
+                }
+            } catch (e: Exception) {
+                _errorMessage.value = "Failed to load user bookings: ${e.message}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+    
     // Add new booking
     fun addBooking(booking: Booking) {
         viewModelScope.launch {
