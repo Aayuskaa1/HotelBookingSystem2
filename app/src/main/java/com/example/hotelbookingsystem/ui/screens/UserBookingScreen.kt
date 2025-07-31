@@ -1,6 +1,7 @@
 package com.example.hotelbookingsystem.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -46,25 +47,27 @@ fun UserBookingScreen(
     var guestEmail by remember { mutableStateOf(currentUser?.email?.split("@")?.firstOrNull() ?: "") }
     var guestPhone by remember { mutableStateOf("") }
     
+    // Date picker states
+    var showCheckInDatePicker by remember { mutableStateOf(false) }
+    var showCheckOutDatePicker by remember { mutableStateOf(false) }
+    var selectedCheckInDate by remember { mutableStateOf<Date?>(null) }
+    var selectedCheckOutDate by remember { mutableStateOf<Date?>(null) }
+    
     var checkInError by remember { mutableStateOf<String?>(null) }
     var checkOutError by remember { mutableStateOf<String?>(null) }
     var guestsError by remember { mutableStateOf<String?>(null) }
     var nameError by remember { mutableStateOf<String?>(null) }
     var emailError by remember { mutableStateOf<String?>(null) }
     
-    // Calculate total price
-    val totalPrice = remember(checkInDate, checkOutDate, numberOfGuests) {
-        if (checkInDate.isNotEmpty() && checkOutDate.isNotEmpty() && numberOfGuests.isNotEmpty()) {
+    // Calculate total price with Nepalese Rupees
+    val totalPrice = remember(selectedCheckInDate, selectedCheckOutDate, numberOfGuests) {
+        if (selectedCheckInDate != null && selectedCheckOutDate != null && numberOfGuests.isNotEmpty()) {
             try {
-                val checkIn = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(checkInDate)
-                val checkOut = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(checkOutDate)
-                if (checkIn != null && checkOut != null) {
-                    val days = ((checkOut.time - checkIn.time) / (1000 * 60 * 60 * 24)).toInt()
-                    val guests = numberOfGuests.toIntOrNull() ?: 1
-                    hotel.pricePerNight * days * guests
-                } else {
-                    0.0
-                }
+                val days = ((selectedCheckOutDate!!.time - selectedCheckInDate!!.time) / (1000 * 60 * 60 * 24)).toInt()
+                val guests = numberOfGuests.toIntOrNull() ?: 1
+                // Convert USD to NPR (approximate rate: 1 USD = 130 NPR)
+                val priceInNPR = hotel.pricePerNight * 130
+                priceInNPR * days * guests
             } catch (e: Exception) {
                 0.0
             }
@@ -127,7 +130,7 @@ fun UserBookingScreen(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "${hotel.currency} ${NumberFormat.getNumberInstance().format(hotel.pricePerNight)}/night",
+                    text = "NPR ${NumberFormat.getNumberInstance().format(hotel.pricePerNight * 130)}/night",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.primary
@@ -194,30 +197,48 @@ fun UserBookingScreen(
             
             // Check-in Date
             OutlinedTextField(
-                value = checkInDate,
-                onValueChange = { 
-                    checkInDate = it
-                    checkInError = null
-                },
-                label = { Text("Check-in Date (YYYY-MM-DD) *") },
-                modifier = Modifier.fillMaxWidth(),
+                value = selectedCheckInDate?.let { 
+                    SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(it) 
+                } ?: "",
+                onValueChange = { },
+                label = { Text("Check-in Date *") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showCheckInDatePicker = true },
                 isError = checkInError != null,
                 supportingText = checkInError?.let { { Text(it) } },
-                singleLine = true
+                singleLine = true,
+                readOnly = true,
+                trailingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.CalendarToday,
+                        contentDescription = "Select Date",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
             )
             
             // Check-out Date
             OutlinedTextField(
-                value = checkOutDate,
-                onValueChange = { 
-                    checkOutDate = it
-                    checkOutError = null
-                },
-                label = { Text("Check-out Date (YYYY-MM-DD) *") },
-                modifier = Modifier.fillMaxWidth(),
+                value = selectedCheckOutDate?.let { 
+                    SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(it) 
+                } ?: "",
+                onValueChange = { },
+                label = { Text("Check-out Date *") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showCheckOutDatePicker = true },
                 isError = checkOutError != null,
                 supportingText = checkOutError?.let { { Text(it) } },
-                singleLine = true
+                singleLine = true,
+                readOnly = true,
+                trailingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.CalendarToday,
+                        contentDescription = "Select Date",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
             )
             
             // Number of Guests
@@ -306,7 +327,7 @@ fun UserBookingScreen(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Total Price: ${hotel.currency} ${NumberFormat.getNumberInstance().format(totalPrice)}",
+                            text = "Total Price: NPR ${NumberFormat.getNumberInstance().format(totalPrice)}",
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
@@ -319,8 +340,8 @@ fun UserBookingScreen(
             Button(
                 onClick = {
                     // Validate form
-                    checkInError = if (checkInDate.isBlank()) "Check-in date is required" else null
-                    checkOutError = if (checkOutDate.isBlank()) "Check-out date is required" else null
+                    checkInError = if (selectedCheckInDate == null) "Check-in date is required" else null
+                    checkOutError = if (selectedCheckOutDate == null) "Check-out date is required" else null
                     guestsError = if (numberOfGuests.isBlank() || numberOfGuests.toIntOrNull() == null || numberOfGuests.toInt() < 1) {
                         "Valid number of guests is required"
                     } else null
@@ -344,10 +365,11 @@ fun UserBookingScreen(
                             userId = currentUser?.uid ?: "user_${System.currentTimeMillis()}",
                             userName = guestName,
                             userEmail = fullEmail,
-                            checkInDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(checkInDate)?.time ?: 0L,
-                            checkOutDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(checkOutDate)?.time ?: 0L,
+                            checkInDate = selectedCheckInDate?.time ?: 0L,
+                            checkOutDate = selectedCheckOutDate?.time ?: 0L,
                             numberOfGuests = numberOfGuests.toInt(),
                             totalAmount = totalPrice,
+                            currency = "NPR",
                             bookingStatus = BookingStatus.PENDING,
                             paymentStatus = PaymentStatus.PENDING,
                             specialRequests = specialRequests,
@@ -375,6 +397,69 @@ fun UserBookingScreen(
                     )
                 }
             }
+        }
+    }
+    
+    // Date Pickers
+    if (showCheckInDatePicker) {
+        val checkInDatePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = selectedCheckInDate?.time ?: System.currentTimeMillis()
+        )
+        
+        DatePickerDialog(
+            onDismissRequest = { showCheckInDatePicker = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        selectedCheckInDate = checkInDatePickerState.selectedDateMillis?.let { Date(it) }
+                        showCheckInDatePicker = false
+                        checkInError = null
+                    }
+                ) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showCheckInDatePicker = false }) {
+                    Text("Cancel")
+                }
+            }
+        ) {
+            DatePicker(
+                state = checkInDatePickerState,
+                showModeToggle = false
+            )
+        }
+    }
+    
+    if (showCheckOutDatePicker) {
+        val checkOutDatePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = selectedCheckOutDate?.time ?: (selectedCheckInDate?.time ?: System.currentTimeMillis())
+        )
+        
+        DatePickerDialog(
+            onDismissRequest = { showCheckOutDatePicker = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        selectedCheckOutDate = checkOutDatePickerState.selectedDateMillis?.let { Date(it) }
+                        showCheckOutDatePicker = false
+                        checkOutError = null
+                    }
+                ) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showCheckOutDatePicker = false }) {
+                    Text("Cancel")
+                }
+            }
+        ) {
+            DatePicker(
+                state = checkOutDatePickerState,
+                showModeToggle = false
+            )
         }
     }
 } 
