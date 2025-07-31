@@ -258,7 +258,8 @@ fun AppNavigation(
                     // For now, just show a message. You can add an edit user screen later
                     // navController.navigate(Screen.EditUser.route)
                 },
-                userViewModel = sharedUserViewModel
+                userViewModel = sharedUserViewModel,
+                bookingViewModel = sharedBookingViewModel
             )
         }
         

@@ -31,6 +31,10 @@ fun AdminDashboard(
     bookingViewModel: com.example.hotelbookingsystem.viewmodel.BookingViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
     userViewModel: com.example.hotelbookingsystem.viewmodel.UserViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
+    var showHotelsDialog by remember { mutableStateOf(false) }
+    var showBookingsDialog by remember { mutableStateOf(false) }
+    var showUsersDialog by remember { mutableStateOf(false) }
+    var showRevenueDialog by remember { mutableStateOf(false) }
     val hotels by hotelViewModel.hotels.collectAsState()
     val bookings by bookingViewModel.bookings.collectAsState()
     val users by userViewModel.users.collectAsState()
@@ -117,13 +121,15 @@ fun AdminDashboard(
                         title = "Total Hotels",
                         value = totalHotels.toString(),
                         icon = Icons.Default.Business,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        onClick = { showHotelsDialog = true }
                     )
                     StatCard(
                         title = "Active Bookings",
                         value = activeBookings.toString(),
                         icon = Icons.Default.BookOnline,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        onClick = { showBookingsDialog = true }
                     )
                 }
                 Spacer(modifier = Modifier.height(12.dp))
@@ -135,13 +141,15 @@ fun AdminDashboard(
                         title = "Total Users",
                         value = totalUsers.toString(),
                         icon = Icons.Default.People,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        onClick = { showUsersDialog = true }
                     )
                     StatCard(
                         title = "Revenue",
                         value = "$${String.format("%.1f", totalRevenue / 1000)}K",
                         icon = Icons.Default.AttachMoney,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        onClick = { showRevenueDialog = true }
                     )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
@@ -216,6 +224,35 @@ fun AdminDashboard(
             }
         }
     }
+    
+    // Dialogs for detailed data views
+    if (showHotelsDialog) {
+        HotelsDetailDialog(
+            hotels = hotels,
+            onDismiss = { showHotelsDialog = false }
+        )
+    }
+    
+    if (showBookingsDialog) {
+        BookingsDetailDialog(
+            bookings = bookings,
+            onDismiss = { showBookingsDialog = false }
+        )
+    }
+    
+    if (showUsersDialog) {
+        UsersDetailDialog(
+            users = users,
+            onDismiss = { showUsersDialog = false }
+        )
+    }
+    
+    if (showRevenueDialog) {
+        RevenueDetailDialog(
+            bookings = bookings,
+            onDismiss = { showRevenueDialog = false }
+        )
+    }
 }
 
 @Composable
@@ -223,12 +260,14 @@ private fun StatCard(
     title: String,
     value: String,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null
 ) {
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        onClick = onClick ?: {}
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -310,4 +349,329 @@ private fun ActionCard(
             )
         }
     }
-} 
+}
+
+@Composable
+private fun HotelsDetailDialog(
+    hotels: List<com.example.hotelbookingsystem.model.Hotel>,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "Total Hotels: ${hotels.size}",
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            LazyColumn(
+                modifier = Modifier.heightIn(max = 400.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(hotels) { hotel ->
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(12.dp)
+                        ) {
+                            Text(
+                                text = hotel.name,
+                                fontWeight = FontWeight.Medium,
+                                fontSize = 16.sp
+                            )
+                            Text(
+                                text = "${hotel.city}, ${hotel.country}",
+                                fontSize = 14.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = "${hotel.currency} ${hotel.pricePerNight}/night",
+                                fontSize = 14.sp,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = "Rating: ${hotel.rating}/5",
+                                    fontSize = 12.sp
+                                )
+                                Text(
+                                    text = if (hotel.isActive) "Active" else "Inactive",
+                                    fontSize = 12.sp,
+                                    color = if (hotel.isActive) Color.Green else Color.Red
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Close")
+            }
+        }
+    )
+}
+
+@Composable
+private fun BookingsDetailDialog(
+    bookings: List<com.example.hotelbookingsystem.model.Booking>,
+    onDismiss: () -> Unit
+) {
+    val activeBookings = bookings.count { it.bookingStatus == com.example.hotelbookingsystem.model.BookingStatus.CONFIRMED }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "Active Bookings: $activeBookings",
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            LazyColumn(
+                modifier = Modifier.heightIn(max = 400.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(bookings.filter { it.bookingStatus == com.example.hotelbookingsystem.model.BookingStatus.CONFIRMED }) { booking ->
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(12.dp)
+                        ) {
+                            Text(
+                                text = booking.hotelName,
+                                fontWeight = FontWeight.Medium,
+                                fontSize = 16.sp
+                            )
+                            Text(
+                                text = "Guest: ${booking.userName}",
+                                fontSize = 14.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = "Check-in: ${booking.checkInDate}",
+                                fontSize = 14.sp
+                            )
+                            Text(
+                                text = "Check-out: ${booking.checkOutDate}",
+                                fontSize = 14.sp
+                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = "${booking.numberOfGuests} guests",
+                                    fontSize = 12.sp
+                                )
+                                Text(
+                                    text = "${booking.currency} ${booking.totalAmount}",
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Close")
+            }
+        }
+    )
+}
+
+@Composable
+private fun UsersDetailDialog(
+    users: List<com.example.hotelbookingsystem.model.User>,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "Total Users: ${users.size}",
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            LazyColumn(
+                modifier = Modifier.heightIn(max = 400.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(users) { user ->
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(12.dp)
+                        ) {
+                            Text(
+                                text = user.displayName,
+                                fontWeight = FontWeight.Medium,
+                                fontSize = 16.sp
+                            )
+                            Text(
+                                text = user.email,
+                                fontSize = 14.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = "Role: ${user.userRole}",
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Text(
+                                    text = if (user.isActive) "Active" else "Inactive",
+                                    fontSize = 12.sp,
+                                    color = if (user.isActive) Color.Green else Color.Red
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Close")
+            }
+        }
+    )
+}
+
+@Composable
+private fun RevenueDetailDialog(
+    bookings: List<com.example.hotelbookingsystem.model.Booking>,
+    onDismiss: () -> Unit
+) {
+    val paidBookings = bookings.filter { it.paymentStatus == com.example.hotelbookingsystem.model.PaymentStatus.PAID }
+    val totalRevenue = paidBookings.sumOf { it.totalAmount }
+    val averageRevenue = if (paidBookings.isNotEmpty()) totalRevenue / paidBookings.size else 0.0
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "Revenue Details",
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Summary cards
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Card(
+                        modifier = Modifier.weight(1f),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(12.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "$${String.format("%.0f", totalRevenue)}",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 18.sp
+                            )
+                            Text(
+                                text = "Total Revenue",
+                                fontSize = 12.sp
+                            )
+                        }
+                    }
+                    Card(
+                        modifier = Modifier.weight(1f),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(12.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "$${String.format("%.0f", averageRevenue)}",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 18.sp
+                            )
+                            Text(
+                                text = "Average",
+                                fontSize = 12.sp
+                            )
+                        }
+                    }
+                }
+                
+                // Paid bookings list
+                Text(
+                    text = "Paid Bookings (${paidBookings.size})",
+                    fontWeight = FontWeight.Medium
+                )
+                
+                LazyColumn(
+                    modifier = Modifier.heightIn(max = 300.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(paidBookings) { booking ->
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = booking.hotelName,
+                                        fontWeight = FontWeight.Medium,
+                                        fontSize = 14.sp
+                                    )
+                                    Text(
+                                        text = booking.userName,
+                                        fontSize = 12.sp,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                Text(
+                                    text = "${booking.currency} ${booking.totalAmount}",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 16.sp,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Close")
+            }
+        }
+    )
+}

@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -29,9 +30,11 @@ import java.util.*
 fun UserManagementScreen(
     onBackClick: () -> Unit,
     onEditUserClick: (User) -> Unit,
-    userViewModel: UserViewModel
+    userViewModel: UserViewModel,
+    bookingViewModel: com.example.hotelbookingsystem.viewmodel.BookingViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
     val users by userViewModel.users.collectAsState()
+    val bookings by bookingViewModel.bookings.collectAsState()
     val isLoading by userViewModel.isLoading.collectAsState()
     val errorMessage by userViewModel.errorMessage.collectAsState()
     val successMessage by userViewModel.successMessage.collectAsState()
@@ -42,9 +45,33 @@ fun UserManagementScreen(
     var showRoleFilterDialog by remember { mutableStateOf(false) }
     var showUserDetailsDialog by remember { mutableStateOf<User?>(null) }
     
-    // Load users on first launch
+    // Load users and bookings on first launch
     LaunchedEffect(Unit) {
         userViewModel.loadUsers()
+        bookingViewModel.loadBookings()
+    }
+    
+    // Filter users who have made bookings
+    val usersWithBookings = remember(users, bookings) {
+        val userEmailsWithBookings = bookings.map { it.userEmail }.toSet()
+        val userIdsWithBookings = bookings.map { it.userId }.toSet()
+        
+        users.filter { user ->
+            userEmailsWithBookings.contains(user.email) || userIdsWithBookings.contains(user.id)
+        }
+    }
+    
+    // Filter users based on search query and role filter
+    val filteredUsers = remember(usersWithBookings, searchQuery, selectedRoleFilter) {
+        usersWithBookings.filter { user ->
+            val matchesSearch = searchQuery.isEmpty() || 
+                user.email.contains(searchQuery, ignoreCase = true) ||
+                user.displayName.contains(searchQuery, ignoreCase = true)
+            
+            val matchesRole = selectedRoleFilter == null || user.userRole == selectedRoleFilter
+            
+            matchesSearch && matchesRole
+        }
     }
     
     // Clear messages after showing
@@ -64,17 +91,17 @@ fun UserManagementScreen(
         TopAppBar(
             title = {
                 Text(
-                    text = "User Management",
+                    text = "Users with Bookings",
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp
                 )
             },
             navigationIcon = {
                 IconButton(onClick = onBackClick) {
-                                    Icon(
-                    imageVector = Icons.Filled.ArrowBack,
-                    contentDescription = "Back"
-                )
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back"
+                    )
                 }
             },
             actions = {
@@ -90,14 +117,11 @@ fun UserManagementScreen(
         // Search Bar
         OutlinedTextField(
             value = searchQuery,
-            onValueChange = { 
-                searchQuery = it
-                userViewModel.searchUsers(it)
-            },
+            onValueChange = { searchQuery = it },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            placeholder = { Text("Search users by email...") },
+            placeholder = { Text("Search users with bookings by email or name...") },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Filled.Search,
@@ -120,8 +144,7 @@ fun UserManagementScreen(
             singleLine = true
         )
         
-        // Statistics Cards
-        val stats = userViewModel.getUserStatistics()
+        // Statistics Cards for Users with Bookings
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -129,25 +152,27 @@ fun UserManagementScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             UserStatCard(
-                title = "Total",
-                value = stats["total"].toString(),
+                title = "Users with Bookings",
+                value = usersWithBookings.size.toString(),
                 modifier = Modifier.weight(1f)
             )
             UserStatCard(
-                title = "Active",
-                value = stats["active"].toString(),
+                title = "Total Bookings",
+                value = bookings.size.toString(),
                 modifier = Modifier.weight(1f)
             )
             UserStatCard(
-                title = "Verified",
-                value = stats["verified"].toString(),
+                title = "Avg Bookings/User",
+                value = if (usersWithBookings.isNotEmpty()) {
+                    String.format("%.1f", bookings.size.toFloat() / usersWithBookings.size)
+                } else "0.0",
                 modifier = Modifier.weight(1f)
             )
         }
         
         Spacer(modifier = Modifier.height(8.dp))
         
-        // Revenue Card
+        // Revenue Card for Users with Bookings
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -165,12 +190,13 @@ fun UserManagementScreen(
             ) {
                 Column {
                     Text(
-                        text = "Total User Revenue",
+                        text = "Revenue from Users with Bookings",
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
+                    val totalRevenue = bookings.sumOf { it.totalAmount }
                     Text(
-                        text = "$${NumberFormat.getNumberInstance().format(userViewModel.getTotalUserRevenue())}",
+                        text = "$${NumberFormat.getNumberInstance().format(totalRevenue)}",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -225,7 +251,7 @@ fun UserManagementScreen(
             ) {
                 CircularProgressIndicator()
             }
-        } else if (users.isEmpty()) {
+        } else if (filteredUsers.isEmpty()) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -241,10 +267,18 @@ fun UserManagementScreen(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = if (searchQuery.isNotEmpty()) "No users found" else "No users registered yet",
+                        text = if (searchQuery.isNotEmpty()) "No users with bookings found" else "No users have made bookings yet",
                         color = Color.Gray,
                         fontSize = 16.sp
                     )
+                    if (searchQuery.isEmpty()) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Only users who have made bookings are shown here",
+                            color = Color.Gray,
+                            fontSize = 12.sp
+                        )
+                    }
                 }
             }
         } else {
@@ -253,7 +287,7 @@ fun UserManagementScreen(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(users) { user ->
+                items(filteredUsers) { user ->
                     UserCard(
                         user = user,
                         onEditClick = { onEditUserClick(user) },
