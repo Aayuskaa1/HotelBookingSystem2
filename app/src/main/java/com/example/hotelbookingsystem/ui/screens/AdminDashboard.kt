@@ -46,8 +46,15 @@ fun AdminDashboard(
         userViewModel.loadUsers()
     }
     
+    // Filter user-generated hotels (not mock data)
+    val userGeneratedHotels = hotels.filter { hotel ->
+        // Mock hotels have IDs like "hotel_1", "hotel_2", etc.
+        // User-generated hotels have UUID-based IDs
+        !hotel.id.startsWith("hotel_")
+    }
+    
     // Calculate statistics
-    val totalHotels = hotels.size
+    val totalHotels = userGeneratedHotels.size
     val activeBookings = bookings.count { it.bookingStatus == com.example.hotelbookingsystem.model.BookingStatus.CONFIRMED }
     val totalUsers = users.size
     val totalRevenue = bookings
@@ -118,7 +125,7 @@ fun AdminDashboard(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     StatCard(
-                        title = "Total Hotels",
+                        title = "User Hotels",
                         value = totalHotels.toString(),
                         icon = Icons.Default.Business,
                         modifier = Modifier.weight(1f),
@@ -228,7 +235,7 @@ fun AdminDashboard(
     // Dialogs for detailed data views
     if (showHotelsDialog) {
         HotelsDetailDialog(
-            hotels = hotels,
+            hotels = userGeneratedHotels,
             onDismiss = { showHotelsDialog = false }
         )
     }
@@ -360,7 +367,7 @@ private fun HotelsDetailDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = "Total Hotels: ${hotels.size}",
+                text = "User-Generated Hotels: ${hotels.size}",
                 fontWeight = FontWeight.Bold
             )
         },

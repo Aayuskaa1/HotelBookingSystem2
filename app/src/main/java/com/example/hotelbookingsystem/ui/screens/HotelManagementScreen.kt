@@ -35,6 +35,14 @@ fun HotelManagementScreen(
     hotelViewModel: HotelViewModel
 ) {
     val hotels by hotelViewModel.hotels.collectAsState()
+    
+    // Filter user-generated hotels (not mock data)
+    val userGeneratedHotels = hotels.filter { hotel ->
+        // Mock hotels have IDs like "hotel_1", "hotel_2", etc.
+        // User-generated hotels have UUID-based IDs
+        !hotel.id.startsWith("hotel_")
+    }
+    
     val isLoading by hotelViewModel.isLoading.collectAsState()
     val errorMessage by hotelViewModel.errorMessage.collectAsState()
     val successMessage by hotelViewModel.successMessage.collectAsState()
@@ -83,7 +91,7 @@ fun HotelManagementScreen(
         TopAppBar(
             title = {
                 Text(
-                    text = "Hotel Management",
+                    text = "User Hotels Management",
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp
                 )
@@ -243,7 +251,7 @@ fun HotelManagementScreen(
             ) {
                 CircularProgressIndicator()
             }
-        } else if (hotels.isEmpty()) {
+        } else if (userGeneratedHotels.isEmpty()) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -282,7 +290,7 @@ fun HotelManagementScreen(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(hotels) { hotel ->
+                items(userGeneratedHotels) { hotel ->
                     HotelCard(
                         hotel = hotel,
                         isSelected = selectedHotels.contains(hotel.id),
