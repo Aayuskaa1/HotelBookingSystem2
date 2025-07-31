@@ -53,11 +53,22 @@ fun AdminDashboard(
         !hotel.id.startsWith("hotel_")
     }
     
+    // Filter bookings for user-generated hotels and users (not mock data)
+    val userGeneratedBookings = bookings.filter { booking ->
+        // Mock bookings have IDs like "booking_1", "booking_2", etc.
+        // Mock hotels have IDs like "hotel_1", "hotel_2", etc.
+        // Mock users have IDs like "user_1", "user_2", etc.
+        // User-generated bookings have UUID-based IDs and reference real hotels/users
+        !booking.id.startsWith("booking_") &&
+        !booking.hotelId.startsWith("hotel_") &&
+        !booking.userId.startsWith("user_")
+    }
+    
     // Calculate statistics
     val totalHotels = userGeneratedHotels.size
-    val activeBookings = bookings.count { it.bookingStatus == com.example.hotelbookingsystem.model.BookingStatus.CONFIRMED }
+    val activeBookings = userGeneratedBookings.count { it.bookingStatus == com.example.hotelbookingsystem.model.BookingStatus.CONFIRMED }
     val totalUsers = users.size
-    val totalRevenue = bookings
+    val totalRevenue = userGeneratedBookings
         .filter { it.paymentStatus == com.example.hotelbookingsystem.model.PaymentStatus.PAID }
         .sumOf { it.totalAmount }
     Box(
@@ -242,7 +253,7 @@ fun AdminDashboard(
     
     if (showBookingsDialog) {
         BookingsDetailDialog(
-            bookings = bookings,
+            bookings = userGeneratedBookings,
             onDismiss = { showBookingsDialog = false }
         )
     }
@@ -437,7 +448,7 @@ private fun BookingsDetailDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = "Active Bookings: $activeBookings",
+                text = "User-Generated Active Bookings: $activeBookings",
                 fontWeight = FontWeight.Bold
             )
         },
