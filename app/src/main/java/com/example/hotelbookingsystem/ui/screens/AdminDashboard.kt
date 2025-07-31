@@ -164,7 +164,7 @@ fun AdminDashboard(
                     )
                     StatCard(
                         title = "Revenue",
-                        value = "$${String.format("%.1f", totalRevenue / 1000)}K",
+                        value = "NPR ${String.format("%.1f", totalRevenue / 1000)}K",
                         icon = Icons.Default.AttachMoney,
                         modifier = Modifier.weight(1f),
                         onClick = { showRevenueDialog = true }
@@ -609,7 +609,7 @@ private fun RevenueDetailDialog(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = "$${String.format("%.0f", totalRevenue)}",
+                                text = "NPR ${String.format("%.0f", totalRevenue)}",
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 18.sp
                             )
@@ -628,7 +628,7 @@ private fun RevenueDetailDialog(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = "$${String.format("%.0f", averageRevenue)}",
+                                text = "NPR ${String.format("%.0f", averageRevenue)}",
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 18.sp
                             )

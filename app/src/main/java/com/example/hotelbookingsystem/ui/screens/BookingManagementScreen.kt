@@ -189,7 +189,7 @@ fun BookingManagementScreen(
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                     Text(
-                        text = "$${NumberFormat.getNumberInstance().format(userGeneratedBookings.filter { it.paymentStatus == com.example.hotelbookingsystem.model.PaymentStatus.PAID }.sumOf { it.totalAmount })}",
+                        text = "NPR ${NumberFormat.getNumberInstance().format(userGeneratedBookings.filter { it.paymentStatus == com.example.hotelbookingsystem.model.PaymentStatus.PAID }.sumOf { it.totalAmount })}",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer

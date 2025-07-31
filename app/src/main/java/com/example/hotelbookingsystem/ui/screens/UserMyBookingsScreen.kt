@@ -373,7 +373,7 @@ fun UserBookingCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = "USD ${NumberFormat.getNumberInstance().format(booking.totalAmount)}",
+                        text = "NPR ${NumberFormat.getNumberInstance().format(booking.totalAmount)}",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.primary

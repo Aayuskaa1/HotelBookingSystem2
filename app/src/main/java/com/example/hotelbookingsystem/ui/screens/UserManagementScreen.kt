@@ -196,7 +196,7 @@ fun UserManagementScreen(
                     )
                     val totalRevenue = bookings.sumOf { it.totalAmount }
                     Text(
-                        text = "$${NumberFormat.getNumberInstance().format(totalRevenue)}",
+                        text = "NPR ${NumberFormat.getNumberInstance().format(totalRevenue)}",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer

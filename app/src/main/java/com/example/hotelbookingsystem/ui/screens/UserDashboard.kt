@@ -248,7 +248,7 @@ fun UserDashboard(
                             com.example.hotelbookingsystem.model.BookingStatus.NO_SHOW -> "No Show"
                         },
                         description = "${booking.hotelName} - ${SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(booking.checkInDate)} to ${SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(booking.checkOutDate)}",
-                        time = "USD ${NumberFormat.getNumberInstance().format(booking.totalAmount)}",
+                        time = "NPR ${NumberFormat.getNumberInstance().format(booking.totalAmount)}",
                         icon = when (booking.bookingStatus) {
                             com.example.hotelbookingsystem.model.BookingStatus.CONFIRMED -> Icons.Default.CheckCircle
                             com.example.hotelbookingsystem.model.BookingStatus.PENDING -> Icons.Default.Schedule
