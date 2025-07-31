@@ -71,7 +71,7 @@ class HotelViewModel : ViewModel() {
                 onSuccess = { newHotel ->
                     println("HotelViewModel: Hotel added successfully: ${newHotel.name} with ID: ${newHotel.id}")
                     println("HotelViewModel: Hotel isActive: ${newHotel.isActive}")
-                    _successMessage.value = "Hotel '${newHotel.name}' added successfully!"
+                    _successMessage.value = "✅ Hotel '${newHotel.name}' added successfully!\n📍 Location: ${newHotel.city}, ${newHotel.country}\n💰 Price: ${newHotel.currency} ${newHotel.pricePerNight}/night\n📋 Status: ${if (newHotel.isActive) "Active" else "Inactive"}\n\nYou can now view it in the hotels list below."
                     println("HotelViewModel: About to refresh hotels list...")
                     loadHotels() // Refresh the list
                 },
@@ -93,7 +93,7 @@ class HotelViewModel : ViewModel() {
             
             repository.updateHotel(hotel).fold(
                 onSuccess = { updatedHotel ->
-                    _successMessage.value = "Hotel '${updatedHotel.name}' updated successfully!"
+                    _successMessage.value = "✅ Hotel '${updatedHotel.name}' updated successfully!\n📍 Location: ${updatedHotel.city}, ${updatedHotel.country}\n💰 Price: ${updatedHotel.currency} ${updatedHotel.pricePerNight}/night\n📋 Status: ${if (updatedHotel.isActive) "Active" else "Inactive"}\n\nChanges have been applied to the hotels list below."
                     loadHotels() // Refresh the list
                 },
                 onFailure = { exception ->
