@@ -57,9 +57,42 @@ fun UserBookingScreen(
     val totalPrice = remember(checkInDate, checkOutDate, numberOfGuests) {
         if (checkInDate.isNotEmpty() && checkOutDate.isNotEmpty() && numberOfGuests.isNotEmpty()) {
             try {
-                val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                val checkIn = dateFormat.parse(checkInDate)
-                val checkOut = dateFormat.parse(checkOutDate)
+                // Try multiple date formats for better user experience
+                val dateFormats = listOf(
+                    SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()),
+                    SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()),
+                    SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()),
+                    SimpleDateFormat("dd/MM/yy", Locale.getDefault()),
+                    SimpleDateFormat("dd-MM-yy", Locale.getDefault()),
+                    SimpleDateFormat("dd/MM/yyyy", Locale.US),
+                    SimpleDateFormat("MM/dd/yyyy", Locale.US),
+                    SimpleDateFormat("yyyy-MM-dd", Locale.US)
+                )
+                
+                var checkIn: Date? = null
+                var checkOut: Date? = null
+                
+                // Try to parse check-in date with different formats
+                for (format in dateFormats) {
+                    try {
+                        format.isLenient = true
+                        checkIn = format.parse(checkInDate)
+                        if (checkIn != null) break
+                    } catch (e: Exception) {
+                        // Continue to next format
+                    }
+                }
+                
+                // Try to parse check-out date with different formats
+                for (format in dateFormats) {
+                    try {
+                        format.isLenient = true
+                        checkOut = format.parse(checkOutDate)
+                        if (checkOut != null) break
+                    } catch (e: Exception) {
+                        // Continue to next format
+                    }
+                }
                 
                 if (checkIn != null && checkOut != null) {
                     val days = ((checkOut.time - checkIn.time) / (1000 * 60 * 60 * 24)).toInt()
@@ -92,9 +125,42 @@ fun UserBookingScreen(
     val bookingDuration = remember(checkInDate, checkOutDate) {
         if (checkInDate.isNotEmpty() && checkOutDate.isNotEmpty()) {
             try {
-                val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                val checkIn = dateFormat.parse(checkInDate)
-                val checkOut = dateFormat.parse(checkOutDate)
+                // Try multiple date formats for better user experience
+                val dateFormats = listOf(
+                    SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()),
+                    SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()),
+                    SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()),
+                    SimpleDateFormat("dd/MM/yy", Locale.getDefault()),
+                    SimpleDateFormat("dd-MM-yy", Locale.getDefault()),
+                    SimpleDateFormat("dd/MM/yyyy", Locale.US),
+                    SimpleDateFormat("MM/dd/yyyy", Locale.US),
+                    SimpleDateFormat("yyyy-MM-dd", Locale.US)
+                )
+                
+                var checkIn: Date? = null
+                var checkOut: Date? = null
+                
+                // Try to parse check-in date with different formats
+                for (format in dateFormats) {
+                    try {
+                        format.isLenient = true
+                        checkIn = format.parse(checkInDate)
+                        if (checkIn != null) break
+                    } catch (e: Exception) {
+                        // Continue to next format
+                    }
+                }
+                
+                // Try to parse check-out date with different formats
+                for (format in dateFormats) {
+                    try {
+                        format.isLenient = true
+                        checkOut = format.parse(checkOutDate)
+                        if (checkOut != null) break
+                    } catch (e: Exception) {
+                        // Continue to next format
+                    }
+                }
                 
                 if (checkIn != null && checkOut != null) {
                     val days = ((checkOut.time - checkIn.time) / (1000 * 60 * 60 * 24)).toInt()
@@ -477,28 +543,95 @@ fun UserBookingScreen(
                     
                     // Validate date format and range
                     if (checkInDate.isNotEmpty() && checkOutDate.isNotEmpty()) {
+                        println("DEBUG: Validating dates - checkInDate: '$checkInDate', checkOutDate: '$checkOutDate'")
+                        
                         try {
-                            val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                            val checkIn = dateFormat.parse(checkInDate)
-                            val checkOut = dateFormat.parse(checkOutDate)
+                            // Try multiple date formats for better user experience
+                            val dateFormats = listOf(
+                                SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()),
+                                SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()),
+                                SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()),
+                                SimpleDateFormat("dd/MM/yy", Locale.getDefault()),
+                                SimpleDateFormat("dd-MM-yy", Locale.getDefault()),
+                                SimpleDateFormat("dd/MM/yyyy", Locale.US),
+                                SimpleDateFormat("MM/dd/yyyy", Locale.US),
+                                SimpleDateFormat("yyyy-MM-dd", Locale.US)
+                            )
+                            
+                            var checkIn: Date? = null
+                            var checkOut: Date? = null
+                            
+                            // Try to parse check-in date with different formats
+                            for (format in dateFormats) {
+                                try {
+                                    format.isLenient = true // Make it more lenient
+                                    checkIn = format.parse(checkInDate)
+                                    if (checkIn != null) {
+                                        println("DEBUG: Check-in date parsed successfully with format: ${format.toPattern()}")
+                                        break
+                                    }
+                                } catch (e: Exception) {
+                                    println("DEBUG: Failed to parse check-in with format ${format.toPattern()}: ${e.message}")
+                                    // Continue to next format
+                                }
+                            }
+                            
+                            // Try to parse check-out date with different formats
+                            for (format in dateFormats) {
+                                try {
+                                    format.isLenient = true // Make it more lenient
+                                    checkOut = format.parse(checkOutDate)
+                                    if (checkOut != null) {
+                                        println("DEBUG: Check-out date parsed successfully with format: ${format.toPattern()}")
+                                        break
+                                    }
+                                } catch (e: Exception) {
+                                    println("DEBUG: Failed to parse check-out with format ${format.toPattern()}: ${e.message}")
+                                    // Continue to next format
+                                }
+                            }
                             
                             if (checkIn == null || checkOut == null) {
-                                checkInError = "Invalid date format. Use DD/MM/YYYY"
-                                checkOutError = "Invalid date format. Use DD/MM/YYYY"
-                            } else if (checkOut <= checkIn) {
-                                checkOutError = "Check-out date must be after check-in date"
+                                println("DEBUG: Date parsing failed - checkIn: $checkIn, checkOut: $checkOut")
+                                checkInError = "Invalid date format. Try DD/MM/YYYY or MM/DD/YYYY"
+                                checkOutError = "Invalid date format. Try DD/MM/YYYY or MM/DD/YYYY"
                             } else {
-                                // Validate booking duration
-                                val days = ((checkOut.time - checkIn.time) / (1000 * 60 * 60 * 24)).toInt()
-                                if (days < 1) {
-                                    checkOutError = "Minimum booking is 1 day"
-                                } else if (days > 30) {
-                                    checkOutError = "Maximum booking is 30 days"
+                                println("DEBUG: Dates parsed successfully - checkIn: $checkIn, checkOut: $checkOut")
+                                
+                                // Check if dates are in the future (allow today as well)
+                                val currentDate = Date()
+                                val today = Calendar.getInstance()
+                                today.set(Calendar.HOUR_OF_DAY, 0)
+                                today.set(Calendar.MINUTE, 0)
+                                today.set(Calendar.SECOND, 0)
+                                today.set(Calendar.MILLISECOND, 0)
+                                
+                                val checkInCalendar = Calendar.getInstance()
+                                checkInCalendar.time = checkIn
+                                checkInCalendar.set(Calendar.HOUR_OF_DAY, 0)
+                                checkInCalendar.set(Calendar.MINUTE, 0)
+                                checkInCalendar.set(Calendar.SECOND, 0)
+                                checkInCalendar.set(Calendar.MILLISECOND, 0)
+                                
+                                if (checkInCalendar.before(today)) {
+                                    checkInError = "Check-in date must be today or in the future"
+                                } else if (checkOut <= checkIn) {
+                                    checkOutError = "Check-out date must be after check-in date"
+                                } else {
+                                    // Validate booking duration
+                                    val days = ((checkOut.time - checkIn.time) / (1000 * 60 * 60 * 24)).toInt()
+                                    println("DEBUG: Booking duration: $days days")
+                                    if (days < 1) {
+                                        checkOutError = "Minimum booking is 1 day"
+                                    } else if (days > 30) {
+                                        checkOutError = "Maximum booking is 30 days"
+                                    }
                                 }
                             }
                         } catch (e: Exception) {
-                            checkInError = "Invalid date format. Use DD/MM/YYYY"
-                            checkOutError = "Invalid date format. Use DD/MM/YYYY"
+                            println("DEBUG: Exception during date validation: ${e.message}")
+                            checkInError = "Invalid date format. Try DD/MM/YYYY or MM/DD/YYYY"
+                            checkOutError = "Invalid date format. Try DD/MM/YYYY or MM/DD/YYYY"
                         }
                     }
                     
@@ -522,10 +655,42 @@ fun UserBookingScreen(
                             "${guestEmail}@example.com"
                         }
                         
-                        // Parse dates for booking
-                        val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                        val checkIn = dateFormat.parse(checkInDate)
-                        val checkOut = dateFormat.parse(checkOutDate)
+                        // Parse dates for booking using flexible format
+                        val dateFormats = listOf(
+                            SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()),
+                            SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()),
+                            SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()),
+                            SimpleDateFormat("dd/MM/yy", Locale.getDefault()),
+                            SimpleDateFormat("dd-MM-yy", Locale.getDefault()),
+                            SimpleDateFormat("dd/MM/yyyy", Locale.US),
+                            SimpleDateFormat("MM/dd/yyyy", Locale.US),
+                            SimpleDateFormat("yyyy-MM-dd", Locale.US)
+                        )
+                        
+                        var checkIn: Date? = null
+                        var checkOut: Date? = null
+                        
+                        // Try to parse check-in date with different formats
+                        for (format in dateFormats) {
+                            try {
+                                format.isLenient = true
+                                checkIn = format.parse(checkInDate)
+                                if (checkIn != null) break
+                            } catch (e: Exception) {
+                                // Continue to next format
+                            }
+                        }
+                        
+                        // Try to parse check-out date with different formats
+                        for (format in dateFormats) {
+                            try {
+                                format.isLenient = true
+                                checkOut = format.parse(checkOutDate)
+                                if (checkOut != null) break
+                            } catch (e: Exception) {
+                                // Continue to next format
+                            }
+                        }
                         
                         val booking = Booking(
                             id = "",
