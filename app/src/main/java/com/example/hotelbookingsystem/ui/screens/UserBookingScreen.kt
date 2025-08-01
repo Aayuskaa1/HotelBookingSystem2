@@ -67,20 +67,15 @@ fun UserBookingScreen(
                     
                     // Validate booking duration
                     if (days < 1) {
-                        checkOutError = "Minimum booking is 1 day"
                         return@remember 0.0
                     }
                     if (days > 30) {
-                        checkOutError = "Maximum booking is 30 days"
                         return@remember 0.0
                     }
                     
                     // Convert USD to NPR (approximate rate: 1 USD = 130 NPR)
                     val priceInNPR = hotel.pricePerNight * 130
                     val total = priceInNPR * days * guests
-                    
-                    // Clear errors if calculation is successful
-                    checkOutError = null
                     total
                 } else {
                     0.0
@@ -413,9 +408,69 @@ fun UserBookingScreen(
                 }
             }
             
+            // Debug info for button state
+            val isButtonEnabled = !isLoading && checkInDate.isNotEmpty() && checkOutDate.isNotEmpty() && 
+                                 numberOfGuests.isNotEmpty() && guestName.isNotEmpty() && guestEmail.isNotEmpty()
+            
+            println("DEBUG: Button enabled state: $isButtonEnabled")
+            println("DEBUG: isLoading: $isLoading, checkInDate: '${checkInDate.isNotEmpty()}', checkOutDate: '${checkOutDate.isNotEmpty()}', numberOfGuests: '${numberOfGuests.isNotEmpty()}', guestName: '${guestName.isNotEmpty()}', guestEmail: '${guestEmail.isNotEmpty()}'")
+            
+            // Debug text to show why button might be disabled
+            if (!isButtonEnabled) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.1f))
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Text(
+                            text = "⚠️ Please fill all required fields to enable booking:",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "• Check-in Date: ${if (checkInDate.isNotEmpty()) "✓" else "✗"}",
+                            fontSize = 12.sp,
+                            color = if (checkInDate.isNotEmpty()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                        )
+                        Text(
+                            text = "• Check-out Date: ${if (checkOutDate.isNotEmpty()) "✓" else "✗"}",
+                            fontSize = 12.sp,
+                            color = if (checkOutDate.isNotEmpty()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                        )
+                        Text(
+                            text = "• Number of Guests: ${if (numberOfGuests.isNotEmpty()) "✓" else "✗"}",
+                            fontSize = 12.sp,
+                            color = if (numberOfGuests.isNotEmpty()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                        )
+                        Text(
+                            text = "• Guest Name: ${if (guestName.isNotEmpty()) "✓" else "✗"}",
+                            fontSize = 12.sp,
+                            color = if (guestName.isNotEmpty()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                        )
+                        Text(
+                            text = "• Email Name: ${if (guestEmail.isNotEmpty()) "✓" else "✗"}",
+                            fontSize = 12.sp,
+                            color = if (guestEmail.isNotEmpty()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+            }
+            
             // Book Now Button
             Button(
                 onClick = {
+                    println("DEBUG: Book Now button clicked!")
+                    println("DEBUG: checkInDate = '$checkInDate'")
+                    println("DEBUG: checkOutDate = '$checkOutDate'")
+                    println("DEBUG: numberOfGuests = '$numberOfGuests'")
+                    println("DEBUG: guestName = '$guestName'")
+                    println("DEBUG: guestEmail = '$guestEmail'")
+                    println("DEBUG: totalPrice = $totalPrice")
+                    
                     // Validate form
                     checkInError = if (checkInDate.isBlank()) "Check-in date is required" else null
                     checkOutError = if (checkOutDate.isBlank()) "Check-out date is required" else null
@@ -432,6 +487,14 @@ fun UserBookingScreen(
                                 checkOutError = "Invalid date format. Use DD/MM/YYYY"
                             } else if (checkOut <= checkIn) {
                                 checkOutError = "Check-out date must be after check-in date"
+                            } else {
+                                // Validate booking duration
+                                val days = ((checkOut.time - checkIn.time) / (1000 * 60 * 60 * 24)).toInt()
+                                if (days < 1) {
+                                    checkOutError = "Minimum booking is 1 day"
+                                } else if (days > 30) {
+                                    checkOutError = "Maximum booking is 30 days"
+                                }
                             }
                         } catch (e: Exception) {
                             checkInError = "Invalid date format. Use DD/MM/YYYY"
@@ -445,8 +508,12 @@ fun UserBookingScreen(
                     nameError = if (guestName.isBlank()) "Guest name is required" else null
                     emailError = if (guestEmail.isBlank()) "Email name is required" else null
                     
+                    println("DEBUG: Validation errors - checkInError: $checkInError, checkOutError: $checkOutError, guestsError: $guestsError, nameError: $nameError, emailError: $emailError")
+                    
                     if (checkInError == null && checkOutError == null && guestsError == null && 
                         nameError == null && emailError == null) {
+                        
+                        println("DEBUG: All validation passed, creating booking...")
                         
                         // Construct full email address
                         val fullEmail = if (guestEmail.contains("@")) {
@@ -478,13 +545,16 @@ fun UserBookingScreen(
                             createdAt = System.currentTimeMillis()
                         )
                         
+                        println("DEBUG: Calling bookingViewModel.addBooking with booking: $booking")
                         bookingViewModel.addBooking(booking)
+                    } else {
+                        println("DEBUG: Validation failed, not creating booking")
                     }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp),
-                enabled = !isLoading && totalPrice > 0
+                enabled = isButtonEnabled
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(

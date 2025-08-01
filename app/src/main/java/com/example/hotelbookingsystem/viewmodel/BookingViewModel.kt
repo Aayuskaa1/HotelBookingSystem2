@@ -71,16 +71,20 @@ class BookingViewModel : ViewModel() {
     
     // Add new booking
     fun addBooking(booking: Booking) {
+        println("DEBUG: BookingViewModel.addBooking called with booking: $booking")
         viewModelScope.launch {
             _isLoading.value = true
             _errorMessage.value = null
             
+            println("DEBUG: Calling repository.addBooking...")
             repository.addBooking(booking).fold(
                 onSuccess = { newBooking ->
+                    println("DEBUG: Booking added successfully: $newBooking")
                     _successMessage.value = "Booking for ${newBooking.hotelName} added successfully!"
                     loadBookings() // Refresh the list
                 },
                 onFailure = { exception ->
+                    println("DEBUG: Booking failed with exception: ${exception.message}")
                     _errorMessage.value = "Failed to add booking: ${exception.message}"
                 }
             )

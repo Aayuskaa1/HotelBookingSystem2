@@ -32,6 +32,7 @@ class MockBookingRepository {
     
     // Add new booking
     suspend fun addBooking(booking: Booking): Result<Booking> {
+        println("DEBUG: MockBookingRepository.addBooking called with booking: $booking")
         return try {
             val bookingWithTimestamp = booking.copy(
                 id = UUID.randomUUID().toString(),
@@ -41,9 +42,11 @@ class MockBookingRepository {
             
             bookings.add(bookingWithTimestamp)
             
+            println("DEBUG: Booking added to list successfully: ${bookingWithTimestamp.id}")
             Log.d("MockBookingRepository", "Booking added successfully: ${bookingWithTimestamp.id}")
             Result.success(bookingWithTimestamp)
         } catch (e: Exception) {
+            println("DEBUG: Error adding booking: ${e.message}")
             Log.e("MockBookingRepository", "Error adding booking: ${e.message}", e)
             Result.failure(e)
         }
