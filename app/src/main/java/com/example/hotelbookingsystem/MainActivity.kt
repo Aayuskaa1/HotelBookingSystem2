@@ -20,13 +20,20 @@ import com.example.hotelbookingsystem.ui.theme.HotelBookingSystemTheme
 import com.example.hotelbookingsystem.viewmodel.AuthViewModel
 import com.example.hotelbookingsystem.viewmodel.AuthState
 import com.google.firebase.FirebaseApp
+import android.util.Log
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        // Initialize Firebase
-        FirebaseApp.initializeApp(this)
+        // Initialize Firebase with error handling
+        try {
+            FirebaseApp.initializeApp(this)
+            Log.d("MainActivity", "Firebase initialized successfully")
+        } catch (e: Exception) {
+            Log.w("MainActivity", "Firebase initialization failed, using mock authentication: ${e.message}")
+            // Continue with mock authentication
+        }
         
         enableEdgeToEdge()
         setContent {

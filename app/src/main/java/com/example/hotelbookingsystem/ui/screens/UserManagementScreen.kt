@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.hotelbookingsystem.model.User
-import com.example.hotelbookingsystem.model.UserRole
+import com.example.hotelbookingsystem.utils.UserRole
 import com.example.hotelbookingsystem.viewmodel.UserViewModel
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
