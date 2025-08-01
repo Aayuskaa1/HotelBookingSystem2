@@ -193,9 +193,6 @@ fun AppNavigation(
                     onHelp = {
                         navController.navigate(Screen.HelpSupport.route)
                     },
-                    onMainScreen = {
-                        navController.navigate(Screen.Main.route)
-                    },
                     bookingViewModel = sharedBookingViewModel
                 )
             } ?: run {
