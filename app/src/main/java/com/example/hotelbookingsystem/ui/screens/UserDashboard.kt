@@ -32,6 +32,7 @@ fun UserDashboard(
     onBookHotel: () -> Unit = {},
     onProfile: () -> Unit = {},
     onHelp: () -> Unit = {},
+    onMainScreen: () -> Unit = {},
     bookingViewModel: com.example.hotelbookingsystem.viewmodel.BookingViewModel
 ) {
     val bookings by bookingViewModel.bookings.collectAsState()
@@ -221,6 +222,15 @@ fun UserDashboard(
                     description = "Get help and contact support",
                     icon = Icons.AutoMirrored.Filled.Help,
                     onClick = onHelp
+                )
+            }
+            
+            item {
+                UserActionCard(
+                    title = "Modern Navigation",
+                    description = "Try the new bottom navigation interface",
+                    icon = Icons.Default.Navigation,
+                    onClick = onMainScreen
                 )
             }
             

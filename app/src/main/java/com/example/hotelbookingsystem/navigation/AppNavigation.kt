@@ -20,6 +20,7 @@ import com.example.hotelbookingsystem.ui.screens.UserBookingScreen
 import com.example.hotelbookingsystem.ui.screens.UserMyBookingsScreen
 import com.example.hotelbookingsystem.ui.screens.UserProfileScreen
 import com.example.hotelbookingsystem.ui.screens.HelpSupportScreen
+import com.example.hotelbookingsystem.ui.screens.MainScreen
 // import com.example.hotelbookingsystem.ui.screens.ReportManagementScreen
 // import com.example.hotelbookingsystem.ui.screens.ReportViewScreen
 import com.example.hotelbookingsystem.utils.UserRoleDetector
@@ -48,6 +49,7 @@ sealed class Screen(val route: String) {
     object UserMyBookings : Screen("user_my_bookings")
     object UserProfile : Screen("user_profile")
     object HelpSupport : Screen("help_support")
+    object Main : Screen("main")
             // Report screens removed
 }
 
@@ -191,6 +193,9 @@ fun AppNavigation(
                     onHelp = {
                         navController.navigate(Screen.HelpSupport.route)
                     },
+                    onMainScreen = {
+                        navController.navigate(Screen.Main.route)
+                    },
                     bookingViewModel = sharedBookingViewModel
                 )
             } ?: run {
@@ -330,6 +335,23 @@ fun AppNavigation(
             HelpSupportScreen(
                 onBackClick = {
                     navController.popBackStack()
+                }
+            )
+        }
+        
+        // Main Screen with Bottom Navigation
+        composable(Screen.Main.route) {
+            MainScreen(
+                currentUser = currentUser,
+                onLogout = onLogout,
+                onNavigateToBookings = {
+                    navController.navigate(Screen.UserMyBookings.route)
+                },
+                onNavigateToPayments = {
+                    // TODO: Add payments screen
+                },
+                onNavigateToSettings = {
+                    navController.navigate(Screen.UserProfile.route)
                 }
             )
         }
