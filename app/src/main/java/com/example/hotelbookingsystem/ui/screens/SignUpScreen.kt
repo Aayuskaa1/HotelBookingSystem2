@@ -99,7 +99,7 @@ fun SignUpScreen(
                     OutlinedTextField(
                         value = name,
                         onValueChange = { name = it },
-                        label = { Text("Full Name") },
+                        label = { Text("Full Name (Optional)") },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Person,
@@ -120,7 +120,7 @@ fun SignUpScreen(
                     OutlinedTextField(
                         value = email,
                         onValueChange = { email = it },
-                        label = { Text("Email") },
+                        label = { Text("Email (Optional)") },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Email,
@@ -141,7 +141,7 @@ fun SignUpScreen(
                     OutlinedTextField(
                         value = password,
                         onValueChange = { password = it },
-                        label = { Text("Password") },
+                        label = { Text("Password (Optional)") },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Lock,
@@ -171,7 +171,7 @@ fun SignUpScreen(
                     OutlinedTextField(
                         value = confirmPassword,
                         onValueChange = { confirmPassword = it },
-                        label = { Text("Confirm Password") },
+                        label = { Text("Confirm Password (Optional)") },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Lock,
@@ -252,59 +252,8 @@ fun SignUpScreen(
                         Spacer(modifier = Modifier.height(16.dp))
                     }
                     
-                    // Debug info for button state
-                    val isButtonEnabled = !isLoading && 
-                            name.isNotEmpty() && 
-                            email.isNotEmpty() && 
-                            password.isNotEmpty() && 
-                            confirmPassword.isNotEmpty() && 
-                            password == confirmPassword
-                    
-                    // Debug text to show why button might be disabled
-                    if (!isButtonEnabled) {
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.1f))
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(16.dp)
-                            ) {
-                                Text(
-                                    text = "⚠️ Please fill all required fields to enable sign up:",
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Medium,
-                                    color = MaterialTheme.colorScheme.error
-                                )
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = "• Full Name: ${if (name.isNotEmpty()) "✓" else "✗"}",
-                                    fontSize = 12.sp,
-                                    color = if (name.isNotEmpty()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
-                                )
-                                Text(
-                                    text = "• Email: ${if (email.isNotEmpty()) "✓" else "✗"}",
-                                    fontSize = 12.sp,
-                                    color = if (email.isNotEmpty()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
-                                )
-                                Text(
-                                    text = "• Password: ${if (password.isNotEmpty()) "✓" else "✗"}",
-                                    fontSize = 12.sp,
-                                    color = if (password.isNotEmpty()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
-                                )
-                                Text(
-                                    text = "• Confirm Password: ${if (confirmPassword.isNotEmpty()) "✓" else "✗"}",
-                                    fontSize = 12.sp,
-                                    color = if (confirmPassword.isNotEmpty()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
-                                )
-                                Text(
-                                    text = "• Passwords Match: ${if (password == confirmPassword && password.isNotEmpty()) "✓" else "✗"}",
-                                    fontSize = 12.sp,
-                                    color = if (password == confirmPassword && password.isNotEmpty()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
-                                )
-                            }
-                        }
-                        Spacer(modifier = Modifier.height(16.dp))
-                    }
+                    // Button is always enabled (no required field validation)
+                    val isButtonEnabled = !isLoading
                     
                     // Sign Up Button
                     Button(

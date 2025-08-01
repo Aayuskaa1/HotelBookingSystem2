@@ -83,26 +83,27 @@ class AuthViewModel : ViewModel() {
     fun signUp(name: String, email: String, password: String, confirmPassword: String) {
         Log.d("AuthViewModel", "Sign up attempt - Name: '$name', Email: '$email', Password: '${password.length} chars', ConfirmPassword: '${confirmPassword.length} chars'")
         
-        if (name.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
-            Log.d("AuthViewModel", "Sign up failed: Empty fields detected")
-            _errorMessage.value = "Please fill in all fields"
-            return
-        }
+        // Handle empty fields gracefully
+        val finalName = if (name.isEmpty()) "Guest User" else name
+        val finalEmail = if (email.isEmpty()) "guest@example.com" else email
+        val finalPassword = if (password.isEmpty()) "guest123" else password
         
-        if (password != confirmPassword) {
+        // Only validate password confirmation if both passwords are provided
+        if (password.isNotEmpty() && confirmPassword.isNotEmpty() && password != confirmPassword) {
             Log.d("AuthViewModel", "Sign up failed: Passwords do not match")
             _errorMessage.value = "Passwords do not match"
             return
         }
         
-        if (password.length < 6) {
+        // Only validate password length if password is provided
+        if (password.isNotEmpty() && password.length < 6) {
             Log.d("AuthViewModel", "Sign up failed: Password too short (${password.length} chars)")
             _errorMessage.value = "Password must be at least 6 characters"
             return
         }
         
-        // Email validation
-        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+        // Only validate email format if email is provided
+        if (email.isNotEmpty() && !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             Log.d("AuthViewModel", "Sign up failed: Invalid email format")
             _errorMessage.value = "Please enter a valid email address"
             return
@@ -118,8 +119,8 @@ class AuthViewModel : ViewModel() {
                 delay(1000)
                 
                 // For demo purposes, create a mock user
-                Log.d("AuthViewModel", "Creating mock user for: $email")
-                val mockUser = MockFirebaseUser(email, name)
+                Log.d("AuthViewModel", "Creating mock user for: $finalEmail")
+                val mockUser = MockFirebaseUser(finalEmail, finalName)
                 Log.d("AuthViewModel", "Mock user created: ${mockUser.uid}")
                 
                 _authState.value = AuthState.Authenticated(mockUser)
