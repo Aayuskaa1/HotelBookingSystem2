@@ -1,8 +1,11 @@
 package com.example.hotelbookingsystem.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.*
@@ -11,10 +14,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.hotelbookingsystem.model.MockFirebaseUser
 import java.text.SimpleDateFormat
 import java.util.*
@@ -43,6 +51,11 @@ fun UserProfileScreen(
     
     var showSaveDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
+    
+    // Image picker states
+    var selectedImageUri by remember { mutableStateOf<String?>(null) }
+    var showImagePicker by remember { mutableStateOf(false) }
+    var showImageOptions by remember { mutableStateOf(false) }
     
     Column(
         modifier = Modifier
@@ -93,14 +106,59 @@ fun UserProfileScreen(
                     modifier = Modifier.padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Icon(
-                        imageVector = Icons.Filled.Person,
-                        contentDescription = "Profile Picture",
-                        modifier = Modifier.size(80.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
+                    // Profile Image
+                    Box(
+                        modifier = Modifier
+                            .size(100.dp)
+                            .clip(CircleShape)
+                            .border(
+                                width = 3.dp,
+                                color = MaterialTheme.colorScheme.primary,
+                                shape = CircleShape
+                            )
+                            .clickable { showImageOptions = true }
+                            .background(MaterialTheme.colorScheme.surfaceVariant),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (selectedImageUri != null) {
+                            AsyncImage(
+                                model = ImageRequest.Builder(LocalContext.current)
+                                    .data(selectedImageUri)
+                                    .crossfade(true)
+                                    .build(),
+                                contentDescription = "Profile Picture",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Filled.Person,
+                                contentDescription = "Profile Picture",
+                                modifier = Modifier.size(50.dp),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                        
+                        // Camera icon overlay
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .size(32.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primary)
+                                .clickable { showImageOptions = true },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.CameraAlt,
+                                contentDescription = "Change Photo",
+                                modifier = Modifier.size(18.dp),
+                                tint = Color.White
+                            )
+                        }
+                    }
                     
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                     
                     Text(
                         text = "Profile Picture",
@@ -111,7 +169,7 @@ fun UserProfileScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                     
                     OutlinedButton(
-                        onClick = { /* TODO: Add image picker */ }
+                        onClick = { showImageOptions = true }
                     ) {
                         Icon(
                             imageVector = Icons.Filled.CameraAlt,
@@ -416,6 +474,55 @@ fun UserProfileScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+    
+    // Image Options Dialog
+    if (showImageOptions) {
+        AlertDialog(
+            onDismissRequest = { showImageOptions = false },
+            title = { Text("Change Profile Photo") },
+            text = { Text("Choose how you want to update your profile picture") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showImageOptions = false
+                        showImagePicker = true
+                    }
+                ) {
+                    Text("Choose Photo")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showImageOptions = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+    
+    // Image Picker Dialog
+    if (showImagePicker) {
+        AlertDialog(
+            onDismissRequest = { showImagePicker = false },
+            title = { Text("Select Photo") },
+            text = { Text("This feature will be implemented with actual image picker functionality. For now, it simulates photo selection.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        // Simulate image selection (in real app, this would open image picker)
+                        selectedImageUri = "https://via.placeholder.com/200x200/2196F3/FFFFFF?text=Profile+Photo"
+                        showImagePicker = false
+                    }
+                ) {
+                    Text("Select")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showImagePicker = false }) {
                     Text("Cancel")
                 }
             }
