@@ -1,9 +1,7 @@
 package com.example.hotelbookingsystem.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -15,7 +13,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -49,47 +46,45 @@ fun UserBookingScreen(
     var guestEmail by remember { mutableStateOf(currentUser?.email?.split("@")?.firstOrNull() ?: "") }
     var guestPhone by remember { mutableStateOf("") }
     
-    // Enhanced date picker states
-    var showCheckInDatePicker by remember { mutableStateOf(false) }
-    var showCheckOutDatePicker by remember { mutableStateOf(false) }
-    var selectedCheckInDate by remember { mutableStateOf<Date?>(null) }
-    var selectedCheckOutDate by remember { mutableStateOf<Date?>(null) }
-    
-    // Calendar validation states
-    var minCheckOutDate by remember { mutableStateOf<Date?>(null) }
-    var maxBookingDays by remember { mutableStateOf(30) } // Maximum 30 days booking
-    var minBookingDays by remember { mutableStateOf(1) } // Minimum 1 day booking
-    
+    // Simple validation states
     var checkInError by remember { mutableStateOf<String?>(null) }
     var checkOutError by remember { mutableStateOf<String?>(null) }
     var guestsError by remember { mutableStateOf<String?>(null) }
     var nameError by remember { mutableStateOf<String?>(null) }
     var emailError by remember { mutableStateOf<String?>(null) }
     
-    // Enhanced total price calculation with validation
-    val totalPrice = remember(selectedCheckInDate, selectedCheckOutDate, numberOfGuests) {
-        if (selectedCheckInDate != null && selectedCheckOutDate != null && numberOfGuests.isNotEmpty()) {
+    // Simple total price calculation
+    val totalPrice = remember(checkInDate, checkOutDate, numberOfGuests) {
+        if (checkInDate.isNotEmpty() && checkOutDate.isNotEmpty() && numberOfGuests.isNotEmpty()) {
             try {
-                val days = ((selectedCheckOutDate!!.time - selectedCheckInDate!!.time) / (1000 * 60 * 60 * 24)).toInt()
-                val guests = numberOfGuests.toIntOrNull() ?: 1
+                val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                val checkIn = dateFormat.parse(checkInDate)
+                val checkOut = dateFormat.parse(checkOutDate)
                 
-                // Validate booking duration
-                if (days < minBookingDays) {
-                    checkOutError = "Minimum booking is $minBookingDays day"
-                    return@remember 0.0
+                if (checkIn != null && checkOut != null) {
+                    val days = ((checkOut.time - checkIn.time) / (1000 * 60 * 60 * 24)).toInt()
+                    val guests = numberOfGuests.toIntOrNull() ?: 1
+                    
+                    // Validate booking duration
+                    if (days < 1) {
+                        checkOutError = "Minimum booking is 1 day"
+                        return@remember 0.0
+                    }
+                    if (days > 30) {
+                        checkOutError = "Maximum booking is 30 days"
+                        return@remember 0.0
+                    }
+                    
+                    // Convert USD to NPR (approximate rate: 1 USD = 130 NPR)
+                    val priceInNPR = hotel.pricePerNight * 130
+                    val total = priceInNPR * days * guests
+                    
+                    // Clear errors if calculation is successful
+                    checkOutError = null
+                    total
+                } else {
+                    0.0
                 }
-                if (days > maxBookingDays) {
-                    checkOutError = "Maximum booking is $maxBookingDays days"
-                    return@remember 0.0
-                }
-                
-                // Convert USD to NPR (approximate rate: 1 USD = 130 NPR)
-                val priceInNPR = hotel.pricePerNight * 130
-                val total = priceInNPR * days * guests
-                
-                // Clear errors if calculation is successful
-                checkOutError = null
-                total
             } catch (e: Exception) {
                 0.0
             }
@@ -99,14 +94,22 @@ fun UserBookingScreen(
     }
     
     // Calculate booking duration for display
-    val bookingDuration = remember(selectedCheckInDate, selectedCheckOutDate) {
-        if (selectedCheckInDate != null && selectedCheckOutDate != null) {
+    val bookingDuration = remember(checkInDate, checkOutDate) {
+        if (checkInDate.isNotEmpty() && checkOutDate.isNotEmpty()) {
             try {
-                val days = ((selectedCheckOutDate!!.time - selectedCheckInDate!!.time) / (1000 * 60 * 60 * 24)).toInt()
-                when {
-                    days == 1 -> "1 day"
-                    days > 1 -> "$days days"
-                    else -> ""
+                val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                val checkIn = dateFormat.parse(checkInDate)
+                val checkOut = dateFormat.parse(checkOutDate)
+                
+                if (checkIn != null && checkOut != null) {
+                    val days = ((checkOut.time - checkIn.time) / (1000 * 60 * 60 * 24)).toInt()
+                    when {
+                        days == 1 -> "1 day"
+                        days > 1 -> "$days days"
+                        else -> ""
+                    }
+                } else {
+                    ""
                 }
             } catch (e: Exception) {
                 ""
@@ -227,7 +230,7 @@ fun UserBookingScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Enhanced Dates Section
+            // Simple Dates Section
             Text(
                 text = "Booking Dates",
                 fontSize = 18.sp,
@@ -235,7 +238,7 @@ fun UserBookingScreen(
                 color = MaterialTheme.colorScheme.primary
             )
             
-            // Calendar guidelines card
+            // Date format guidelines card
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
@@ -244,24 +247,24 @@ fun UserBookingScreen(
                     modifier = Modifier.padding(12.dp)
                 ) {
                     Text(
-                        text = "📅 Calendar Guidelines",
+                        text = "📅 Date Format Guidelines",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSecondaryContainer
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "• Date range: 1999-2028",
+                        text = "• Use format: DD/MM/YYYY (e.g., 25/12/2024)",
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSecondaryContainer
                     )
                     Text(
-                        text = "• Minimum booking: $minBookingDays day",
+                        text = "• Minimum booking: 1 day",
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSecondaryContainer
                     )
                     Text(
-                        text = "• Maximum booking: $maxBookingDays days",
+                        text = "• Maximum booking: 30 days",
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSecondaryContainer
                     )
@@ -273,76 +276,46 @@ fun UserBookingScreen(
                 }
             }
             
-            // Enhanced Check-in Date
+            // Simple Check-in Date
             OutlinedTextField(
-                value = selectedCheckInDate?.let { 
-                    SimpleDateFormat("dd MMM", Locale.getDefault()).format(it) 
-                } ?: "",
-                onValueChange = { },
+                value = checkInDate,
+                onValueChange = { 
+                    checkInDate = it
+                    checkInError = null
+                },
                 label = { Text("Check-in Date *") },
-                placeholder = { Text("Select date") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { showCheckInDatePicker = true },
+                placeholder = { Text("DD/MM/YYYY (e.g., 25/12/2024)") },
+                modifier = Modifier.fillMaxWidth(),
                 isError = checkInError != null,
                 supportingText = {
                     if (checkInError != null) {
                         Text(checkInError!!)
-                    } else if (selectedCheckInDate != null) {
-                        Text("Selected: ${SimpleDateFormat("EEEE, dd MMM yyyy", Locale.getDefault()).format(selectedCheckInDate!!)}")
                     } else {
-                        Text("Tap to select check-in date")
+                        Text("Enter check-in date in DD/MM/YYYY format")
                     }
                 },
-                singleLine = true,
-                readOnly = true,
-                trailingIcon = {
-                    CalendarIconWithDate(
-                        date = selectedCheckInDate,
-                        contentDescription = "Select Check-in Date",
-                        tint = if (selectedCheckInDate != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+                singleLine = true
             )
             
-            // Enhanced Check-out Date
+            // Simple Check-out Date
             OutlinedTextField(
-                value = selectedCheckOutDate?.let { 
-                    SimpleDateFormat("dd MMM", Locale.getDefault()).format(it) 
-                } ?: "",
-                onValueChange = { },
+                value = checkOutDate,
+                onValueChange = { 
+                    checkOutDate = it
+                    checkOutError = null
+                },
                 label = { Text("Check-out Date *") },
-                placeholder = { Text("Select date") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { 
-                        if (selectedCheckInDate != null) {
-                            showCheckOutDatePicker = true
-                        } else {
-                            checkOutError = "Please select check-in date first"
-                        }
-                    },
+                placeholder = { Text("DD/MM/YYYY (e.g., 28/12/2024)") },
+                modifier = Modifier.fillMaxWidth(),
                 isError = checkOutError != null,
                 supportingText = {
                     if (checkOutError != null) {
                         Text(checkOutError!!)
-                    } else if (selectedCheckOutDate != null) {
-                        Text("Selected: ${SimpleDateFormat("EEEE, dd MMM yyyy", Locale.getDefault()).format(selectedCheckOutDate!!)} • Duration: $bookingDuration")
-                    } else if (selectedCheckInDate != null) {
-                        Text("Tap to select check-out date (after ${SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(selectedCheckInDate!!)})")
                     } else {
-                        Text("Select check-in date first")
+                        Text("Enter check-out date in DD/MM/YYYY format")
                     }
                 },
-                singleLine = true,
-                readOnly = true,
-                trailingIcon = {
-                    CalendarIconWithDate(
-                        date = selectedCheckOutDate,
-                        contentDescription = "Select Check-out Date",
-                        tint = if (selectedCheckOutDate != null) MaterialTheme.colorScheme.primary else if (selectedCheckInDate != null) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                    )
-                }
+                singleLine = true
             )
             
             // Number of Guests
@@ -482,15 +455,28 @@ fun UserBookingScreen(
             Button(
                 onClick = {
                     // Validate form
-                    checkInError = if (selectedCheckInDate == null) "Check-in date is required" else null
-                    checkOutError = if (selectedCheckOutDate == null) "Check-out date is required" else null
+                    checkInError = if (checkInDate.isBlank()) "Check-in date is required" else null
+                    checkOutError = if (checkOutDate.isBlank()) "Check-out date is required" else null
                     
-                    // Validate date range
-                    if (selectedCheckInDate != null && selectedCheckOutDate != null) {
-                        if (selectedCheckOutDate!! <= selectedCheckInDate!!) {
-                            checkOutError = "Check-out date must be after check-in date"
+                    // Validate date format and range
+                    if (checkInDate.isNotEmpty() && checkOutDate.isNotEmpty()) {
+                        try {
+                            val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                            val checkIn = dateFormat.parse(checkInDate)
+                            val checkOut = dateFormat.parse(checkOutDate)
+                            
+                            if (checkIn == null || checkOut == null) {
+                                checkInError = "Invalid date format. Use DD/MM/YYYY"
+                                checkOutError = "Invalid date format. Use DD/MM/YYYY"
+                            } else if (checkOut <= checkIn) {
+                                checkOutError = "Check-out date must be after check-in date"
+                            }
+                        } catch (e: Exception) {
+                            checkInError = "Invalid date format. Use DD/MM/YYYY"
+                            checkOutError = "Invalid date format. Use DD/MM/YYYY"
                         }
                     }
+                    
                     guestsError = if (numberOfGuests.isBlank() || numberOfGuests.toIntOrNull() == null || numberOfGuests.toInt() < 1) {
                         "Valid number of guests is required"
                     } else null
@@ -507,6 +493,11 @@ fun UserBookingScreen(
                             "${guestEmail}@example.com"
                         }
                         
+                        // Parse dates for booking
+                        val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                        val checkIn = dateFormat.parse(checkInDate)
+                        val checkOut = dateFormat.parse(checkOutDate)
+                        
                         val booking = Booking(
                             id = "",
                             hotelId = hotel.id,
@@ -514,8 +505,8 @@ fun UserBookingScreen(
                             userId = currentUser?.uid ?: "user_${System.currentTimeMillis()}",
                             userName = guestName,
                             userEmail = fullEmail,
-                            checkInDate = selectedCheckInDate?.time ?: 0L,
-                            checkOutDate = selectedCheckOutDate?.time ?: 0L,
+                            checkInDate = checkIn?.time ?: 0L,
+                            checkOutDate = checkOut?.time ?: 0L,
                             numberOfGuests = numberOfGuests.toInt(),
                             totalAmount = totalPrice,
                             currency = "NPR",
@@ -545,171 +536,6 @@ fun UserBookingScreen(
                         fontWeight = FontWeight.Medium
                     )
                 }
-            }
-        }
-    }
-    
-    // Enhanced Date Pickers
-    if (showCheckInDatePicker) {
-        val checkInDatePickerState = rememberDatePickerState(
-            initialSelectedDateMillis = selectedCheckInDate?.time ?: System.currentTimeMillis(),
-            yearRange = IntRange(1999, 2028)
-        )
-        
-        DatePickerDialog(
-            onDismissRequest = { showCheckInDatePicker = false },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        val selectedDate = checkInDatePickerState.selectedDateMillis?.let { Date(it) }
-                        if (selectedDate != null) {
-                            selectedCheckInDate = selectedDate
-                            
-                            // Reset check-out date if it's before new check-in date
-                            if (selectedCheckOutDate != null && selectedCheckOutDate!!.before(selectedDate)) {
-                                selectedCheckOutDate = null
-                                checkOutError = "Please select a new check-out date"
-                            }
-                            
-                            checkInError = null
-                        }
-                        showCheckInDatePicker = false
-                    }
-                ) {
-                    Text("Confirm")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showCheckInDatePicker = false }) {
-                    Text("Cancel")
-                }
-            }
-        ) {
-            Column {
-                Text(
-                    text = "Select Check-in Date",
-                    modifier = Modifier.padding(16.dp),
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                DatePicker(
-                    state = checkInDatePickerState,
-                    showModeToggle = false
-                )
-            }
-        }
-    }
-    
-    if (showCheckOutDatePicker) {
-        val checkOutDatePickerState = rememberDatePickerState(
-            initialSelectedDateMillis = selectedCheckOutDate?.time ?: (selectedCheckInDate?.time ?: System.currentTimeMillis()),
-            yearRange = IntRange(1999, 2028)
-        )
-        
-        DatePickerDialog(
-            onDismissRequest = { showCheckOutDatePicker = false },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        val selectedDate = checkOutDatePickerState.selectedDateMillis?.let { Date(it) }
-                        if (selectedDate != null && selectedCheckInDate != null) {
-                            // Validate check-out date is after check-in date
-                            if (selectedDate.after(selectedCheckInDate)) {
-                                val daysDiff = ((selectedDate.time - selectedCheckInDate!!.time) / (1000 * 60 * 60 * 24)).toInt()
-                                
-                                // Validate booking duration
-                                if (daysDiff >= minBookingDays && daysDiff <= maxBookingDays) {
-                                    selectedCheckOutDate = selectedDate
-                                    checkOutError = null
-                                    showCheckOutDatePicker = false
-                                } else {
-                                    checkOutError = if (daysDiff < minBookingDays) {
-                                        "Minimum booking is $minBookingDays day"
-                                    } else {
-                                        "Maximum booking is $maxBookingDays days"
-                                    }
-                                }
-                            } else {
-                                checkOutError = "Check-out date must be after check-in date"
-                            }
-                        } else {
-                            checkOutError = "Please select a valid check-out date"
-                        }
-                    }
-                ) {
-                    Text("Confirm")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showCheckOutDatePicker = false }) {
-                    Text("Cancel")
-                }
-            }
-        ) {
-            Column {
-                Text(
-                    text = "Select Check-out Date",
-                    modifier = Modifier.padding(16.dp),
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                if (selectedCheckInDate != null) {
-                    Text(
-                        text = "After: ${SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(selectedCheckInDate!!)}",
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                DatePicker(
-                    state = checkOutDatePickerState,
-                    showModeToggle = false
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun CalendarIconWithDate(
-    date: Date?,
-    contentDescription: String?,
-    tint: Color
-) {
-    Box(
-        modifier = Modifier.size(40.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        // Calendar icon background
-        Icon(
-            imageVector = Icons.Default.CalendarToday,
-            contentDescription = contentDescription,
-            tint = tint,
-            modifier = Modifier.size(40.dp)
-        )
-        
-        // Date number overlay with better visibility
-        if (date != null) {
-            val dayOfMonth = SimpleDateFormat("dd", Locale.getDefault()).format(date)
-            
-            // Day number with background for better visibility
-            Box(
-                modifier = Modifier
-                    .size(18.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.primary,
-                        shape = RoundedCornerShape(9.dp)
-                    )
-                    .offset(y = (-6).dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = dayOfMonth,
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    textAlign = TextAlign.Center
-                )
             }
         }
     }
