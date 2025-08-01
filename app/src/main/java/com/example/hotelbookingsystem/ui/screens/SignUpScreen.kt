@@ -9,9 +9,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.rememberDatePickerState
+
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,8 +38,6 @@ fun SignUpScreen(
     var confirmPassword by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
-    var dateOfBirth by remember { mutableStateOf("") }
-    var showDatePicker by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
@@ -190,41 +186,10 @@ fun SignUpScreen(
                         modifier = Modifier.fillMaxWidth(),
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Password,
-                            imeAction = ImeAction.Next
-                        ),
-                        singleLine = true,
-                        isError = password.isNotEmpty() && confirmPassword.isNotEmpty() && password != confirmPassword
-                    )
-                    
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    // Date of Birth Field with Calendar
-                    OutlinedTextField(
-                        value = dateOfBirth,
-                        onValueChange = { dateOfBirth = it },
-                        label = { Text("Date of Birth (Optional)") },
-                        placeholder = { Text("DD/MM/YYYY") },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.CalendarToday,
-                                contentDescription = "Calendar"
-                            )
-                        },
-                        trailingIcon = {
-                            IconButton(onClick = { showDatePicker = true }) {
-                                Icon(
-                                    imageVector = Icons.Default.CalendarToday,
-                                    contentDescription = "Select Date"
-                                )
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Text,
                             imeAction = ImeAction.Done
                         ),
                         singleLine = true,
-                        readOnly = true
+                        isError = password.isNotEmpty() && confirmPassword.isNotEmpty() && password != confirmPassword
                     )
                     
                     // Password mismatch error
@@ -313,38 +278,6 @@ fun SignUpScreen(
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
-            }
-        }
-        
-        // Date Picker Dialog
-        if (showDatePicker) {
-            val datePickerState = rememberDatePickerState(
-                initialSelectedDateMillis = System.currentTimeMillis() - (18 * 365 * 24 * 60 * 60 * 1000L) // Default to 18 years ago
-            )
-            
-            DatePickerDialog(
-                onDismissRequest = { showDatePicker = false },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            datePickerState.selectedDateMillis?.let { millis ->
-                                val date = java.util.Date(millis)
-                                val formatter = java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault())
-                                dateOfBirth = formatter.format(date)
-                            }
-                            showDatePicker = false
-                        }
-                    ) {
-                        Text("OK")
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { showDatePicker = false }) {
-                        Text("Cancel")
-                    }
-                }
-            ) {
-                DatePicker(state = datePickerState)
             }
         }
     }
