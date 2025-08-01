@@ -238,44 +238,6 @@ fun UserBookingScreen(
                 color = MaterialTheme.colorScheme.primary
             )
             
-            // Date format guidelines card
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
-            ) {
-                Column(
-                    modifier = Modifier.padding(12.dp)
-                ) {
-                    Text(
-                        text = "📅 Date Format Guidelines",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "• Use format: DD/MM/YYYY (e.g., 25/12/2024)",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer
-                    )
-                    Text(
-                        text = "• Minimum booking: 1 day",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer
-                    )
-                    Text(
-                        text = "• Maximum booking: 30 days",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer
-                    )
-                    Text(
-                        text = "• Check-out must be after check-in",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer
-                    )
-                }
-            }
-            
             // Simple Check-in Date
             OutlinedTextField(
                 value = checkInDate,
@@ -284,14 +246,14 @@ fun UserBookingScreen(
                     checkInError = null
                 },
                 label = { Text("Check-in Date *") },
-                placeholder = { Text("DD/MM/YYYY (e.g., 25/12/2024)") },
+                placeholder = { Text("DD/MM/YYYY") },
                 modifier = Modifier.fillMaxWidth(),
                 isError = checkInError != null,
                 supportingText = {
                     if (checkInError != null) {
                         Text(checkInError!!)
                     } else {
-                        Text("Enter check-in date in DD/MM/YYYY format")
+                        Text("Enter check-in date")
                     }
                 },
                 singleLine = true
@@ -305,14 +267,14 @@ fun UserBookingScreen(
                     checkOutError = null
                 },
                 label = { Text("Check-out Date *") },
-                placeholder = { Text("DD/MM/YYYY (e.g., 28/12/2024)") },
+                placeholder = { Text("DD/MM/YYYY") },
                 modifier = Modifier.fillMaxWidth(),
                 isError = checkOutError != null,
                 supportingText = {
                     if (checkOutError != null) {
                         Text(checkOutError!!)
                     } else {
-                        Text("Enter check-out date in DD/MM/YYYY format")
+                        Text("Enter check-out date")
                     }
                 },
                 singleLine = true
