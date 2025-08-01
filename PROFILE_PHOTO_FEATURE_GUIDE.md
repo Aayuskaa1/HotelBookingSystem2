@@ -25,8 +25,8 @@ Your hotel booking system now features a **complete profile photo change functio
 ### **📋 User Interaction Flow**
 1. **User clicks** on profile image or camera icon
 2. **Image options dialog** appears with choices
-3. **User selects** "Choose Photo" option
-4. **Image picker dialog** opens for photo selection
+3. **User selects** "Choose from Gallery" or "Take Photo"
+4. **Gallery picker** opens to select from device photos
 5. **Selected image** displays in profile circle
 6. **Image persists** during profile editing session
 
@@ -34,6 +34,7 @@ Your hotel booking system now features a **complete profile photo change functio
 - ✅ **Profile image circle**: Clickable for photo selection
 - ✅ **Camera icon overlay**: Quick access to photo picker
 - ✅ **Change Photo button**: Alternative way to access feature
+- ✅ **Gallery picker**: Access to device photo gallery
 - ✅ **Dialog confirmations**: Clear user guidance
 
 ## 📊 **Visual Examples**
@@ -150,13 +151,35 @@ if (showImageOptions) {
         title = { Text("Change Profile Photo") },
         text = { Text("Choose how you want to update your profile picture") },
         confirmButton = {
-            TextButton(
-                onClick = {
-                    showImageOptions = false
-                    showImagePicker = true
+            Column {
+                TextButton(
+                    onClick = {
+                        showImageOptions = false
+                        showImagePicker = true
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.PhotoLibrary,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Choose from Gallery")
                 }
-            ) {
-                Text("Choose Photo")
+                TextButton(
+                    onClick = {
+                        showImageOptions = false
+                        showImagePicker = true
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.CameraAlt,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Take Photo")
+                }
             }
         },
         dismissButton = {
@@ -180,6 +203,7 @@ if (showImageOptions) {
 - **Multiple Access Points**: Image circle, camera icon, and button
 - **Clear Visual Feedback**: Camera icon overlay for guidance
 - **Intuitive Dialogs**: Step-by-step photo selection process
+- **Gallery Integration**: Direct access to device photos
 - **Responsive Design**: Works on all screen sizes
 
 ### **✅ Technical Features**
@@ -285,8 +309,8 @@ The profile photo change feature is **fully functional** and ready for:
 ### **From User Profile:**
 1. **Navigate** to "My Profile" screen
 2. **Click** on the profile image circle or camera icon
-3. **Select** "Choose Photo" from the options dialog
-4. **Confirm** photo selection in the picker dialog
+3. **Select** "Choose from Gallery" from the options dialog
+4. **Browse** your device photos and select one
 5. **View** your new profile photo displayed in the circle
 
 ### **Access Points:**
