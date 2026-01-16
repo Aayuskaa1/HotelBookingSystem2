@@ -81,23 +81,37 @@ class AuthViewModel : ViewModel() {
     }
     
     fun signUp(name: String, email: String, password: String, confirmPassword: String) {
-        if (name.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
-            _errorMessage.value = "Please fill in all fields"
-            return
-        }
+        Log.d("AuthViewModel", "Sign up attempt - Name: '$name', Email: '$email', Password: '${password.length} chars', ConfirmPassword: '${confirmPassword.length} chars'")
         
-        if (password != confirmPassword) {
+        // Handle empty fields gracefully
+        val finalName = if (name.isEmpty()) "Guest User" else name
+        val finalEmail = if (email.isEmpty()) "guest@example.com" else email
+        val finalPassword = if (password.isEmpty()) "guest123" else password
+        
+        // Only validate password confirmation if both passwords are provided
+        if (password.isNotEmpty() && confirmPassword.isNotEmpty() && password != confirmPassword) {
+            Log.d("AuthViewModel", "Sign up failed: Passwords do not match")
             _errorMessage.value = "Passwords do not match"
             return
         }
         
-        if (password.length < 6) {
+        // Only validate password length if password is provided
+        if (password.isNotEmpty() && password.length < 6) {
+            Log.d("AuthViewModel", "Sign up failed: Password too short (${password.length} chars)")
             _errorMessage.value = "Password must be at least 6 characters"
+            return
+        }
+        
+        // Only validate email format if email is provided
+        if (email.isNotEmpty() && !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            Log.d("AuthViewModel", "Sign up failed: Invalid email format")
+            _errorMessage.value = "Please enter a valid email address"
             return
         }
         
         viewModelScope.launch {
             try {
+                Log.d("AuthViewModel", "Starting sign up process...")
                 _isLoading.value = true
                 _errorMessage.value = null
                 
@@ -105,14 +119,21 @@ class AuthViewModel : ViewModel() {
                 delay(1000)
                 
                 // For demo purposes, create a mock user
-                Log.d("AuthViewModel", "User signed up: $email")
-                val mockUser = MockFirebaseUser(email, name)
+                Log.d("AuthViewModel", "Creating mock user for: $finalEmail")
+                val mockUser = MockFirebaseUser(finalEmail, finalName)
+                Log.d("AuthViewModel", "Mock user created: ${mockUser.uid}")
+                
                 _authState.value = AuthState.Authenticated(mockUser)
+                Log.d("AuthViewModel", "Sign up successful, user authenticated")
+                
+                // Clear any previous error messages
+                _errorMessage.value = null
             } catch (e: Exception) {
                 Log.e("AuthViewModel", "Signup error: ${e.message}", e)
                 _errorMessage.value = "Sign up failed: ${e.message ?: "Unknown error"}"
             } finally {
                 _isLoading.value = false
+                Log.d("AuthViewModel", "Sign up process completed")
             }
         }
     }

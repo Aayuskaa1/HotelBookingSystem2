@@ -4,7 +4,9 @@ import com.example.hotelbookingsystem.model.MockFirebaseUser
 
 enum class UserRole {
     ADMIN,
-    USER
+    USER,
+    MODERATOR,
+    PREMIUM_USER
 }
 
 object UserRoleDetector {

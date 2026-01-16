@@ -3,7 +3,7 @@ package com.example.hotelbookingsystem.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.hotelbookingsystem.model.User
-import com.example.hotelbookingsystem.model.UserRole
+import com.example.hotelbookingsystem.utils.UserRole
 import com.example.hotelbookingsystem.repository.MockUserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

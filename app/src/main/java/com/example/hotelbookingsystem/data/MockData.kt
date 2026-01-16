@@ -1,6 +1,7 @@
 package com.example.hotelbookingsystem.data
 
 import com.example.hotelbookingsystem.model.*
+import com.example.hotelbookingsystem.utils.UserRole
 
 object MockData {
     

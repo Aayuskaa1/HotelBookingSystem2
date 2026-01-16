@@ -1,6 +1,7 @@
 package com.example.hotelbookingsystem.model
 
 import java.util.UUID
+import com.example.hotelbookingsystem.utils.UserRole
 
 data class User(
     val id: String = UUID.randomUUID().toString(),
@@ -78,11 +79,4 @@ data class User(
             )
         }
     }
-}
-
-enum class UserRole {
-    USER,
-    ADMIN,
-    MODERATOR,
-    PREMIUM_USER
 } 

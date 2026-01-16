@@ -35,6 +35,14 @@ fun HotelManagementScreen(
     hotelViewModel: HotelViewModel
 ) {
     val hotels by hotelViewModel.hotels.collectAsState()
+    
+    // Filter user-generated hotels (not mock data)
+    val userGeneratedHotels = hotels.filter { hotel ->
+        // Mock hotels have IDs like "hotel_1", "hotel_2", etc.
+        // User-generated hotels have UUID-based IDs
+        !hotel.id.startsWith("hotel_")
+    }
+    
     val isLoading by hotelViewModel.isLoading.collectAsState()
     val errorMessage by hotelViewModel.errorMessage.collectAsState()
     val successMessage by hotelViewModel.successMessage.collectAsState()
@@ -83,7 +91,7 @@ fun HotelManagementScreen(
         TopAppBar(
             title = {
                 Text(
-                    text = "Hotel Management",
+                    text = "User Hotels Management",
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp
                 )
@@ -201,13 +209,36 @@ fun HotelManagementScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
             ) {
-                Text(
-                    text = message,
-                    modifier = Modifier.padding(16.dp),
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.CheckCircle,
+                            contentDescription = "Success",
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Hotel Operation Successful",
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            fontSize = 16.sp
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = message,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        fontSize = 14.sp
+                    )
+                }
             }
             println("HotelManagementScreen: Success message displayed: $message")
         }
@@ -220,7 +251,7 @@ fun HotelManagementScreen(
             ) {
                 CircularProgressIndicator()
             }
-        } else if (hotels.isEmpty()) {
+        } else if (userGeneratedHotels.isEmpty()) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -259,7 +290,7 @@ fun HotelManagementScreen(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(hotels) { hotel ->
+                items(userGeneratedHotels) { hotel ->
                     HotelCard(
                         hotel = hotel,
                         isSelected = selectedHotels.contains(hotel.id),
@@ -403,6 +434,13 @@ fun HotelCard(
     onToggleStatus: (Boolean) -> Unit,
     onSelectionChanged: (Boolean) -> Unit = {}
 ) {
+    // Check if hotel was added recently (within last 5 minutes)
+    val isRecentlyAdded = remember(hotel.id) {
+        val currentTime = System.currentTimeMillis()
+        val fiveMinutesAgo = currentTime - (5 * 60 * 1000)
+        // For mock data, we'll consider hotels with recent IDs as "new"
+        hotel.id.contains("hotel_") && hotel.id.length > 10
+    }
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -428,13 +466,36 @@ fun HotelCard(
                 )
                 
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = hotel.name,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = hotel.name,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        
+                        // New badge for recently added hotels
+                        if (isRecentlyAdded) {
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Card(
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.primary
+                                ),
+                                modifier = Modifier.height(20.dp)
+                            ) {
+                                Text(
+                                    text = "NEW",
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onPrimary,
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                )
+                            }
+                        }
+                    }
                     Text(
                         text = "${hotel.city}, ${hotel.country}",
                         fontSize = 14.sp,

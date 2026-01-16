@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -34,6 +35,18 @@ fun BookingManagementScreen(
     bookingViewModel: BookingViewModel
 ) {
     val bookings by bookingViewModel.bookings.collectAsState()
+    
+    // Filter bookings for user-generated hotels and users (not mock data)
+    val userGeneratedBookings = bookings.filter { booking ->
+        // Mock bookings have IDs like "booking_1", "booking_2", etc.
+        // Mock hotels have IDs like "hotel_1", "hotel_2", etc.
+        // Mock users have IDs like "user_1", "user_2", etc.
+        // User-generated bookings have UUID-based IDs and reference real hotels/users
+        !booking.id.startsWith("booking_") &&
+        !booking.hotelId.startsWith("hotel_") &&
+        !booking.userId.startsWith("user_")
+    }
+    
     val isLoading by bookingViewModel.isLoading.collectAsState()
     val errorMessage by bookingViewModel.errorMessage.collectAsState()
     val successMessage by bookingViewModel.successMessage.collectAsState()
@@ -65,17 +78,17 @@ fun BookingManagementScreen(
         TopAppBar(
             title = {
                 Text(
-                    text = "Booking Management",
+                    text = "User Bookings Management",
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp
                 )
             },
             navigationIcon = {
                 IconButton(onClick = onBackClick) {
-                                    Icon(
-                    imageVector = Icons.Filled.ArrowBack,
-                    contentDescription = "Back"
-                )
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back"
+                    )
                 }
             },
             actions = {
@@ -121,8 +134,13 @@ fun BookingManagementScreen(
             singleLine = true
         )
         
-        // Statistics Cards
-        val stats = bookingViewModel.getBookingStatistics()
+        // Statistics Cards for User-Generated Bookings
+        val userStats = mapOf(
+            "total" to userGeneratedBookings.size,
+            "confirmed" to userGeneratedBookings.count { it.bookingStatus == com.example.hotelbookingsystem.model.BookingStatus.CONFIRMED },
+            "pending" to userGeneratedBookings.count { it.bookingStatus == com.example.hotelbookingsystem.model.BookingStatus.PENDING }
+        )
+        
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -131,17 +149,17 @@ fun BookingManagementScreen(
         ) {
             BookingStatCard(
                 title = "Total",
-                value = stats["total"].toString(),
+                value = userStats["total"].toString(),
                 modifier = Modifier.weight(1f)
             )
             BookingStatCard(
                 title = "Confirmed",
-                value = stats["confirmed"].toString(),
+                value = userStats["confirmed"].toString(),
                 modifier = Modifier.weight(1f)
             )
             BookingStatCard(
                 title = "Pending",
-                value = stats["pending"].toString(),
+                value = userStats["pending"].toString(),
                 modifier = Modifier.weight(1f)
             )
         }
@@ -171,7 +189,7 @@ fun BookingManagementScreen(
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                     Text(
-                        text = "$${NumberFormat.getNumberInstance().format(bookingViewModel.getTotalRevenue())}",
+                        text = "NPR ${NumberFormat.getNumberInstance().format(userGeneratedBookings.filter { it.paymentStatus == com.example.hotelbookingsystem.model.PaymentStatus.PAID }.sumOf { it.totalAmount })}",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -226,7 +244,7 @@ fun BookingManagementScreen(
             ) {
                 CircularProgressIndicator()
             }
-        } else if (bookings.isEmpty()) {
+        } else if (userGeneratedBookings.isEmpty()) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -254,7 +272,7 @@ fun BookingManagementScreen(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(bookings) { booking ->
+                items(userGeneratedBookings) { booking ->
                     BookingCard(
                         booking = booking,
                         onEditClick = { onEditBookingClick(booking) },

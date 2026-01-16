@@ -9,6 +9,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,6 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignUpScreen(
     onSignUpClick: (String, String, String, String) -> Unit,
@@ -93,7 +95,7 @@ fun SignUpScreen(
                     OutlinedTextField(
                         value = name,
                         onValueChange = { name = it },
-                        label = { Text("Full Name") },
+                        label = { Text("Full Name (Optional)") },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Person,
@@ -114,7 +116,7 @@ fun SignUpScreen(
                     OutlinedTextField(
                         value = email,
                         onValueChange = { email = it },
-                        label = { Text("Email") },
+                        label = { Text("Email (Optional)") },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Email,
@@ -135,7 +137,7 @@ fun SignUpScreen(
                     OutlinedTextField(
                         value = password,
                         onValueChange = { password = it },
-                        label = { Text("Password") },
+                        label = { Text("Password (Optional)") },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Lock,
@@ -165,7 +167,7 @@ fun SignUpScreen(
                     OutlinedTextField(
                         value = confirmPassword,
                         onValueChange = { confirmPassword = it },
-                        label = { Text("Confirm Password") },
+                        label = { Text("Confirm Password (Optional)") },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Lock,
@@ -215,18 +217,24 @@ fun SignUpScreen(
                         Spacer(modifier = Modifier.height(16.dp))
                     }
                     
+                    // Button is always enabled (no required field validation)
+                    val isButtonEnabled = !isLoading
+                    
                     // Sign Up Button
                     Button(
-                        onClick = { onSignUpClick(name, email, password, confirmPassword) },
+                        onClick = { 
+                            println("DEBUG: Sign Up button clicked!")
+                            println("DEBUG: Name: '$name'")
+                            println("DEBUG: Email: '$email'")
+                            println("DEBUG: Password: '${password.length} chars'")
+                            println("DEBUG: Confirm Password: '${confirmPassword.length} chars'")
+                            println("DEBUG: Passwords match: ${password == confirmPassword}")
+                            onSignUpClick(name, email, password, confirmPassword) 
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp),
-                        enabled = !isLoading && 
-                                name.isNotEmpty() && 
-                                email.isNotEmpty() && 
-                                password.isNotEmpty() && 
-                                confirmPassword.isNotEmpty() && 
-                                password == confirmPassword,
+                        enabled = isButtonEnabled,
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         if (isLoading) {

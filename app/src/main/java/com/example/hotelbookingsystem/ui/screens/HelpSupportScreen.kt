@@ -376,7 +376,7 @@ fun ContactInfoCard() {
             Spacer(modifier = Modifier.height(12.dp))
             
             ContactInfoRow(
-                icon = Icons.Filled.Chat,
+                icon = Icons.AutoMirrored.Filled.Chat,
                 title = "Live Chat",
                 value = "Available 24/7"
             )

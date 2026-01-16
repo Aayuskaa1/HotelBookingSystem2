@@ -30,6 +30,7 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserMyBookingsScreen(
+    currentUser: com.example.hotelbookingsystem.model.MockFirebaseUser?,
     onBackClick: () -> Unit,
     onBookingClick: (Booking) -> Unit,
     bookingViewModel: BookingViewModel
@@ -44,20 +45,28 @@ fun UserMyBookingsScreen(
     var showCancelDialog by remember { mutableStateOf<Booking?>(null) }
     
     // Load user's bookings on first launch
-    LaunchedEffect(Unit) {
-        bookingViewModel.loadBookings()
+    LaunchedEffect(currentUser) {
+        if (currentUser != null) {
+            bookingViewModel.loadUserBookings(currentUser.uid)
+        } else {
+            bookingViewModel.loadBookings()
+        }
     }
     
-    // Filter bookings for current user (simulate user-specific bookings)
-    val userBookings = remember(bookings, searchQuery, selectedStatusFilter) {
+    // Filter bookings for current user
+    val userBookings = remember(bookings, searchQuery, selectedStatusFilter, currentUser) {
         bookings.filter { booking ->
+            // Only show bookings for the current user
+            val isUserBooking = currentUser?.uid == booking.userId || 
+                               currentUser?.email == booking.userEmail
+            
             val matchesSearch = searchQuery.isEmpty() || 
                 booking.hotelName.contains(searchQuery, ignoreCase = true) ||
                 booking.userName.contains(searchQuery, ignoreCase = true)
             
             val matchesStatus = selectedStatusFilter == null || booking.bookingStatus == selectedStatusFilter
             
-            matchesSearch && matchesStatus
+            isUserBooking && matchesSearch && matchesStatus
         }
     }
     
@@ -364,7 +373,7 @@ fun UserBookingCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = "USD ${NumberFormat.getNumberInstance().format(booking.totalAmount)}",
+                        text = "NPR ${NumberFormat.getNumberInstance().format(booking.totalAmount)}",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.primary

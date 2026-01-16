@@ -20,6 +20,7 @@ import com.example.hotelbookingsystem.ui.screens.UserBookingScreen
 import com.example.hotelbookingsystem.ui.screens.UserMyBookingsScreen
 import com.example.hotelbookingsystem.ui.screens.UserProfileScreen
 import com.example.hotelbookingsystem.ui.screens.HelpSupportScreen
+import com.example.hotelbookingsystem.ui.screens.MainScreen
 // import com.example.hotelbookingsystem.ui.screens.ReportManagementScreen
 // import com.example.hotelbookingsystem.ui.screens.ReportViewScreen
 import com.example.hotelbookingsystem.utils.UserRoleDetector
@@ -48,6 +49,7 @@ sealed class Screen(val route: String) {
     object UserMyBookings : Screen("user_my_bookings")
     object UserProfile : Screen("user_profile")
     object HelpSupport : Screen("help_support")
+    object Main : Screen("main")
             // Report screens removed
 }
 
@@ -157,7 +159,9 @@ fun AppNavigation(
                     onManageUsers = {
                         navController.navigate(Screen.UserManagement.route)
                     },
-                            // onViewReports removed
+                    hotelViewModel = sharedHotelViewModel,
+                    bookingViewModel = sharedBookingViewModel,
+                    userViewModel = sharedUserViewModel
                 )
             } ?: run {
                 // If no user, navigate back to login
@@ -256,7 +260,8 @@ fun AppNavigation(
                     // For now, just show a message. You can add an edit user screen later
                     // navController.navigate(Screen.EditUser.route)
                 },
-                userViewModel = sharedUserViewModel
+                userViewModel = sharedUserViewModel,
+                bookingViewModel = sharedBookingViewModel
             )
         }
         
@@ -279,6 +284,7 @@ fun AppNavigation(
             selectedHotelForBooking?.let { hotel ->
                 UserBookingScreen(
                     hotel = hotel,
+                    currentUser = currentUser,
                     onBackClick = {
                         navController.popBackStack()
                     },
@@ -294,6 +300,7 @@ fun AppNavigation(
         // User My Bookings Screen
         composable(Screen.UserMyBookings.route) {
             UserMyBookingsScreen(
+                currentUser = currentUser,
                 onBackClick = {
                     navController.popBackStack()
                 },
@@ -325,6 +332,23 @@ fun AppNavigation(
             HelpSupportScreen(
                 onBackClick = {
                     navController.popBackStack()
+                }
+            )
+        }
+        
+        // Main Screen with Bottom Navigation
+        composable(Screen.Main.route) {
+            MainScreen(
+                currentUser = currentUser,
+                onLogout = onLogout,
+                onNavigateToBookings = {
+                    navController.navigate(Screen.UserMyBookings.route)
+                },
+                onNavigateToPayments = {
+                    // TODO: Add payments screen
+                },
+                onNavigateToSettings = {
+                    navController.navigate(Screen.UserProfile.route)
                 }
             )
         }
